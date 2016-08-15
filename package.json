@@ -1,0 +1,31 @@
+{
+  "name": "debugging-proxy",
+  "version": "0.0.1",
+  "description": "Web debugging proxy",
+  "main": "server.js",
+  "dependencies": {
+    "bunyan": "^1.8.1",
+    "config": "^1.21.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.3.0",
+    "eslint-config-airbnb": "^10.0.1",
+    "eslint-plugin-import": "^1.13.0",
+    "eslint-plugin-jsx-a11y": "^2.1.0",
+    "eslint-plugin-react": "^6.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evgeny-myasishchev/debugging-proxy.git"
+  },
+  "author": "Evgeny Myasishchev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/evgeny-myasishchev/debugging-proxy/issues"
+  },
+  "homepage": "https://github.com/evgeny-myasishchev/debugging-proxy#readme"
+}
