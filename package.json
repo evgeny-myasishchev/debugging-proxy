@@ -5,7 +5,9 @@
   "main": "server.js",
   "dependencies": {
     "bunyan": "^1.8.1",
-    "config": "^1.21.0"
+    "config": "^1.21.0",
+    "http-proxy": "^1.14.0",
+    "uuid": "~2.0.2"
   },
   "devDependencies": {
     "eslint": "^3.3.0",
