@@ -5,7 +5,7 @@ const protocols = {
 };
 
 function start(port, cb) {
-  protocols.http.listen(port, cb);
+  protocols.http.listen({ port }, cb);
 }
 
 module.exports = {
