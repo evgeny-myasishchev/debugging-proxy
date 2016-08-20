@@ -5,11 +5,11 @@ module.exports = {
   http: {
     method: () => chance.pick(['GET', 'POST', 'PUT', 'DELETE']),
     request: () => {
-      const requestUrl = url.parse(chance.url());
+      const requestUrl = url.parse(`${chance.url()}?key1=${chance.word()}&key2=${chance.word()}`);
       return {
         method: chance.http.method(),
         url: requestUrl.href,
-        httpVersion: '1.1',
+        httpVersion: chance.pick(['1.0', '1.1', '2.0']),
         rawHeaders: [
           'Host', requestUrl.host,
           'X-Header-1', `header-1-${chance.word()}`,
