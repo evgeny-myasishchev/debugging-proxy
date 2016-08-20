@@ -3,4 +3,7 @@ module.exports = {
   log: {
     name: 'DEBUGGING-PROXY',
   },
+  storage: {
+    path: 'var/data',
+  },
 };
