@@ -4,6 +4,7 @@ module.exports = {
     file: 'test.log',
   },
   storage: {
-    memory: true,
+    streamsDir: 'tmp/streams-dir',
+    dataFileName: 'tmp/test.db',
   },
 };
