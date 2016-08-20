@@ -48,24 +48,56 @@ describe('storage', () => {
         (next) => storage.saveRequest(requestId, request, next),
         (next) => db.get(requestId, next),
         (data, next) => {
-          expect(data.host).to.eql(requestUrl.host);
-          expect(data.method).to.eql(request.method);
-          expect(data.path).to.eql(request.path);
-          expect(data.httpVersion).to.eql(request.httpVersion);
-          expect(data.headers).to.eql(_.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
+          const reqData = data.request;
+          expect(reqData.host).to.eql(requestUrl.host);
+          expect(reqData.method).to.eql(request.method);
+          expect(reqData.path).to.eql(request.path);
+          expect(reqData.httpVersion).to.eql(request.httpVersion);
+          expect(reqData.headers).to.eql(_.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
           expect(data.date).to.eql(new Date().toISOString());
           next();
         },
       ], done);
     });
 
-    xit('should save request into streams dir', () => {
+    xit('should save request body into streams dir', () => {
     });
   });
 
-  xdescribe('saveResponse', () => {
-    it('should save response with headers and body', () => {
+  describe('saveResponse', () => {
+    let response;
+    beforeEach(() => (response = chance.http.response()));
 
+    it('should save response with headers and body', (done) => {
+      const requestId = uuid.v4();
+      async.waterfall([
+        (next) => storage.saveResponse(requestId, response, next),
+        (next) => db.get(requestId, next),
+        (data, next) => {
+          const respData = data.response;
+          expect(respData.statusCode).to.eql(response.statusCode);
+          expect(respData.statusMessage).to.eql(response.statusMessage);
+          expect(respData.httpVersion).to.eql(response.httpVersion);
+          expect(respData.headers).to.eql(_.map(_.chunk(response.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
+          next();
+        },
+      ], done);
+    });
+
+    xit('should not clear request data', (done) => {
+      const requestId = uuid.v4();
+      async.waterfall([
+        (next) => storage.saveRequest(requestId, chance.http.request(), next),
+        (next) => storage.saveResponse(requestId, response, next),
+        (next) => db.get(requestId, next),
+        (data, next) => {
+          expect(data.request).not.to.be.an('undefined');
+          next();
+        },
+      ], done);
+    });
+
+    xit('should save response body into streams dir', () => {
     });
   });
 });
