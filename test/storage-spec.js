@@ -35,6 +35,52 @@ describe('storage', () => {
     ], done);
   });
 
+  afterEach((done) => {
+    db.remove({}, done);
+  });
+
+  describe('getRequests', () => {
+    it('should get all saved requests', (done) => {
+      const req1 = chance.http.requestWithBody(tmpDir);
+      const req2 = chance.http.requestWithBody(tmpDir);
+
+      async.waterfall([
+        async.apply(async.parallel, [
+          (next) => storage.saveRequest(req1.meta.id, req1, next),
+          (next) => storage.saveRequest(req2.meta.id, req2, next),
+        ]),
+        (res, next) => storage.getRequests(next),
+        (requests, next) => {
+          expect(requests.length).to.eql(2);
+          const actualReq1 = _.find(requests, _.matches({ _id: req1.meta.id }));
+          expect(actualReq1.request.path).to.eql(url.parse(req1.url).path);
+          const actualReq2 = _.find(requests, _.matches({ _id: req2.meta.id }));
+          expect(actualReq2.request.path).to.eql(url.parse(req2.url).path);
+          next();
+        },
+      ], done);
+    });
+
+    it('should include response', (done) => {
+      const request = chance.http.requestWithBody(tmpDir);
+      const response = chance.http.responseWithBody(request.meta.id, tmpDir);
+      async.waterfall([
+        async.apply(async.waterfall, [
+          (next) => storage.saveRequest(request.meta.id, request, next),
+          (next) => storage.saveResponse(request.meta.id, response, next),
+        ]),
+        (next) => storage.getRequests(next),
+        (requests, next) => {
+          const req = _.find(requests, _.matches({ _id: request.meta.id }));
+          expect(req.request.path).to.eql(url.parse(request.url).path);
+          expect(req.response.statusCode).to.eql(response.statusCode);
+          expect(req.response.statusMessage).to.eql(response.statusMessage);
+          next();
+        },
+      ], done);
+    });
+  });
+
   describe('saveRequest', () => {
     let request;
     let fakeBody;
