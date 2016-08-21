@@ -6,7 +6,6 @@ module.exports = {
     file: null,
   },
   storage: {
-    streamsDir: 'var/streams',
-    dataFileName: 'var/data.db',
+    filename: 'var/data.db',
   },
 };
