@@ -23,6 +23,12 @@ describe('storage', () => {
   });
   const db = storage.db;
 
+  function streamToBuffer(stream, cb) {
+    const bufs = [];
+    stream.on('data', (d) => bufs.push(d));
+    stream.on('end', () => cb(null, Buffer.concat(bufs)));
+  }
+
   beforeEach((done) => {
     async.waterfall([
       reflect(async.apply(fs.stat, tmpDir)),
@@ -75,6 +81,28 @@ describe('storage', () => {
           expect(req.request.path).to.eql(url.parse(request.url).path);
           expect(req.response.statusCode).to.eql(response.statusCode);
           expect(req.response.statusMessage).to.eql(response.statusMessage);
+          next();
+        },
+      ], done);
+    });
+  });
+
+  describe('createRequestBodyStream', () => {
+    it('should create read stream for given requestId', (done) => {
+      const req1 = chance.http.requestWithBody(tmpDir);
+      const req2 = chance.http.requestWithBody(tmpDir);
+      async.waterfall([
+        async.apply(async.parallel, [
+          (next) => storage.saveRequest(req1.meta.id, req1, next),
+          (next) => storage.saveRequest(req2.meta.id, req2, next),
+        ]),
+        (res, next) => streamToBuffer(storage.createRequestBodyStream(req1.meta.id), next),
+        (buffer, next) => {
+          expect(buffer.toString()).to.eql(req1.meta.body.data);
+          streamToBuffer(storage.createRequestBodyStream(req2.meta.id), next);
+        },
+        (buffer, next) => {
+          expect(buffer.toString()).to.eql(req2.meta.body.data);
           next();
         },
       ], done);
