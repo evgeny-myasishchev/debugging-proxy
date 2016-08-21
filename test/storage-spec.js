@@ -109,6 +109,32 @@ describe('storage', () => {
     });
   });
 
+  describe('createResponseBodyStream', () => {
+    it('should create read stream for given requestId', (done) => {
+      const req1 = chance.http.requestWithBody(tmpDir);
+      const res1 = chance.http.responseWithBody(req1.meta.id, tmpDir);
+      const req2 = chance.http.requestWithBody(tmpDir);
+      const res2 = chance.http.responseWithBody(req2.meta.id, tmpDir);
+      async.waterfall([
+        async.apply(async.waterfall, [
+          (next) => storage.saveRequest(req1.meta.id, req1, next),
+          (next) => storage.saveResponse(req1.meta.id, res1, next),
+          (next) => storage.saveRequest(req2.meta.id, req2, next),
+          (next) => storage.saveResponse(req2.meta.id, res2, next),
+        ]),
+        (next) => streamToBuffer(storage.createResponseBodyStream(req1.meta.id), next),
+        (buffer, next) => {
+          expect(buffer.toString()).to.eql(res1.meta.body.data);
+          streamToBuffer(storage.createResponseBodyStream(req2.meta.id), next);
+        },
+        (buffer, next) => {
+          expect(buffer.toString()).to.eql(res2.meta.body.data);
+          next();
+        },
+      ], done);
+    });
+  });
+
   describe('saveRequest', () => {
     let request;
     let fakeBody;
