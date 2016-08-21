@@ -1,13 +1,26 @@
+const _ = require('lodash');
 const chance = require('chance')();
+const fs = require('fs');
+const path = require('path');
 const url = require('url');
 
 module.exports = {
   http: {
     method: () => chance.pick(['GET', 'POST', 'PUT', 'DELETE']),
     httpVersion: () => chance.pick(['1.0', '1.1', '2.0']),
-    request: () => {
-      const requestUrl = url.parse(`${chance.url()}?key1=${chance.word()}&key2=${chance.word()}`);
+    prepareBodyStream: (requestId, tmpDir) => {
+      const reqBodyFile = path.join(tmpDir, `input-body-${requestId}.txt`);
+      let reqBody;
+      fs.writeFileSync(reqBodyFile, reqBody = chance.sentence());
       return {
+        stream: fs.createReadStream(reqBodyFile),
+        path: reqBodyFile,
+        data: reqBody,
+      };
+    },
+    request: (bodyStream) => {
+      const requestUrl = url.parse(`${chance.url()}?key1=${chance.word()}&key2=${chance.word()}`);
+      return _.merge(bodyStream, {
         method: chance.http.method(),
         url: requestUrl.href,
         httpVersion: chance.http.httpVersion(),
@@ -17,7 +30,7 @@ module.exports = {
           'X-Header-2', `header-2-${chance.word()}`,
           'X-Header-3', `header-3-${chance.word()}`,
         ],
-      };
+      });
     },
     response: () => (
       {

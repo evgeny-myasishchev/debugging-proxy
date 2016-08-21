@@ -6,6 +6,7 @@ const chanceMixin = require('./support/chanceMixin');
 const fs = require('fs');
 const path = require('path');
 const reflect = require('async/reflect');
+const rimraf = require('rimraf');
 const Storage = require('../lib/storagev2');
 const url = require('url');
 const uuid = require('uuid');
@@ -14,31 +15,36 @@ const expect = chai.expect;
 chance.mixin(chanceMixin);
 
 describe('storage', () => {
-  const streamsDir = path.normalize(path.join(__dirname, '..', 'tmp', 'streams-dir'));
+  const tmpDir = path.normalize(path.join(__dirname, '..', 'tmp', 'storage-spec'));
+  const streamsDir = path.normalize(path.join(tmpDir, 'streams-dir'));
   const storage = new Storage(streamsDir);
   const db = storage.db;
 
   beforeEach((done) => {
     async.waterfall([
-      reflect(async.apply(fs.stat, streamsDir)),
+      reflect(async.apply(fs.stat, tmpDir)),
       (res, next) => {
         if (res.error) return next(res.error.code === 'ENOENT' ? null : res.error);
-        return fs.rmdir(streamsDir, next);
+        return rimraf(tmpDir, next);
       },
+      async.apply(fs.mkdir, tmpDir),
       async.apply(fs.mkdir, streamsDir),
     ], done);
   });
 
   describe('saveRequest', () => {
     let request;
+    let fakeBody;
+    let requestId;
 
     beforeEach(() => {
-      request = chance.http.request();
+      requestId = uuid.v4();
+      fakeBody = chance.http.prepareBodyStream(requestId, tmpDir);
+      request = chance.http.request(fakeBody.stream);
     });
 
     it('should save request with headers', (done) => {
       const requestUrl = url.parse(request.url);
-      const requestId = uuid.v4();
       async.waterfall([
         (next) => storage.saveRequest(requestId, request, next),
         (next) => db.findOne({ _id: requestId }, next),
@@ -46,7 +52,7 @@ describe('storage', () => {
           const reqData = data.request;
           expect(reqData.host).to.eql(requestUrl.host);
           expect(reqData.method).to.eql(request.method);
-          expect(reqData.path).to.eql(request.path);
+          expect(reqData.path).to.eql(requestUrl.path);
           expect(reqData.httpVersion).to.eql(request.httpVersion);
           expect(reqData.headers).to.eql(_.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
           expect(data.date.getTime()).to.be.closeTo(new Date().getTime(), 100);
@@ -55,7 +61,16 @@ describe('storage', () => {
       ], done);
     });
 
-    xit('should save request body into streams dir', () => {
+    it('should save request body into streams dir', (done) => {
+      async.waterfall([
+        (next) => storage.saveRequest(requestId, request, next),
+        (next) => {
+          const reqFile = path.join(streamsDir, `${requestId}-req.txt`);
+          expect(fs.existsSync(reqFile), `Req body has not been saved to ${reqFile}`).to.eql(true);
+          expect(fs.readFileSync(reqFile).toString()).to.eql(fakeBody.data);
+          next();
+        },
+      ], done);
     });
   });
 
