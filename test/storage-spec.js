@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const reflect = require('async/reflect');
 const rimraf = require('rimraf');
-const Storage = require('../lib/storagev2');
+const Storage = require('../lib/Storage');
 const url = require('url');
 const uuid = require('uuid');
 
