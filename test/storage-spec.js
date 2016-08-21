@@ -8,6 +8,7 @@ const path = require('path');
 const reflect = require('async/reflect');
 const rimraf = require('rimraf');
 const Storage = require('../lib/Storage');
+const streams = require('./support/streams');
 const url = require('url');
 const uuid = require('uuid');
 
@@ -22,12 +23,6 @@ describe('storage', () => {
     streamsDir: path.join('tmp', 'storage-spec', 'streams-dir'),
   });
   const db = storage.db;
-
-  function streamToBuffer(stream, cb) {
-    const bufs = [];
-    stream.on('data', (d) => bufs.push(d));
-    stream.on('end', () => cb(null, Buffer.concat(bufs)));
-  }
 
   beforeEach((done) => {
     async.waterfall([
@@ -96,10 +91,10 @@ describe('storage', () => {
           (next) => storage.saveRequest(req1.meta.id, req1, next),
           (next) => storage.saveRequest(req2.meta.id, req2, next),
         ]),
-        (res, next) => streamToBuffer(storage.createRequestBodyStream(req1.meta.id), next),
+        (res, next) => streams.toBuffer(storage.createRequestBodyStream(req1.meta.id), next),
         (buffer, next) => {
           expect(buffer.toString()).to.eql(req1.meta.body.data);
-          streamToBuffer(storage.createRequestBodyStream(req2.meta.id), next);
+          streams.toBuffer(storage.createRequestBodyStream(req2.meta.id), next);
         },
         (buffer, next) => {
           expect(buffer.toString()).to.eql(req2.meta.body.data);
@@ -122,10 +117,10 @@ describe('storage', () => {
           (next) => storage.saveRequest(req2.meta.id, req2, next),
           (next) => storage.saveResponse(req2.meta.id, res2, next),
         ]),
-        (next) => streamToBuffer(storage.createResponseBodyStream(req1.meta.id), next),
+        (next) => streams.toBuffer(storage.createResponseBodyStream(req1.meta.id), next),
         (buffer, next) => {
           expect(buffer.toString()).to.eql(res1.meta.body.data);
-          streamToBuffer(storage.createResponseBodyStream(req2.meta.id), next);
+          streams.toBuffer(storage.createResponseBodyStream(req2.meta.id), next);
         },
         (buffer, next) => {
           expect(buffer.toString()).to.eql(res2.meta.body.data);
