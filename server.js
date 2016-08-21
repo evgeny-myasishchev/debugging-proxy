@@ -10,6 +10,14 @@ const opts = {
     cert: fs.readFileSync(config.get('ssl.cert')),
   },
 };
+
+const streamsDir = config.get('storage.streamsDir');
+try {
+  fs.mkdirSync(streamsDir);
+} catch (e) {
+  if (e.code !== 'EEXIST') throw e;
+}
+
 proxy.listen(opts, (error) => {
   if (error) throw error;
 });

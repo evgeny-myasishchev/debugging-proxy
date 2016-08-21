@@ -7,5 +7,7 @@ module.exports = {
   },
   storage: {
     filename: 'var/data.db',
+    streamsDir: 'var/streams',
+    inMemoryOnly: false,
   },
 };

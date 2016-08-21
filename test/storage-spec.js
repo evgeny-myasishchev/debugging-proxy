@@ -17,7 +17,10 @@ chance.mixin(chanceMixin);
 describe('storage', () => {
   const tmpDir = path.normalize(path.join(__dirname, '..', 'tmp', 'storage-spec'));
   const streamsDir = path.normalize(path.join(tmpDir, 'streams-dir'));
-  const storage = new Storage(streamsDir);
+  const storage = new Storage({
+    inMemoryOnly: true,
+    streamsDir: path.join('tmp', 'storage-spec', 'streams-dir'),
+  });
   const db = storage.db;
 
   beforeEach((done) => {
