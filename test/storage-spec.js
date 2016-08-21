@@ -77,10 +77,13 @@ describe('storage', () => {
   describe('saveResponse', () => {
     let response;
     let requestId;
+    let fakeResBody;
     beforeEach((done) => {
       requestId = uuid.v4();
-      response = chance.http.response();
-      storage.saveRequest(requestId, chance.http.request(), done);
+      fakeResBody = chance.http.prepareBodyStream(requestId, tmpDir, 'response-');
+      const fakeReqBody = chance.http.prepareBodyStream(requestId, tmpDir, 'request-');
+      response = chance.http.response(fakeResBody.stream);
+      storage.saveRequest(requestId, chance.http.request(fakeReqBody.stream), done);
     });
 
     it('should save response with headers and body', (done) => {
@@ -120,7 +123,16 @@ describe('storage', () => {
       ], done);
     });
 
-    xit('should save response body into streams dir', () => {
+    it('should save response body into streams dir', (done) => {
+      async.waterfall([
+        (next) => storage.saveResponse(requestId, response, next),
+        (next) => {
+          const resFile = path.join(streamsDir, `${requestId}-res.txt`);
+          expect(fs.existsSync(resFile), `Res body has not been saved to ${resFile}`).to.eql(true);
+          expect(fs.readFileSync(resFile).toString()).to.eql(fakeResBody.data);
+          next();
+        },
+      ], done);
     });
   });
 });

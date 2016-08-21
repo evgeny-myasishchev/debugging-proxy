@@ -8,8 +8,8 @@ module.exports = {
   http: {
     method: () => chance.pick(['GET', 'POST', 'PUT', 'DELETE']),
     httpVersion: () => chance.pick(['1.0', '1.1', '2.0']),
-    prepareBodyStream: (requestId, tmpDir) => {
-      const reqBodyFile = path.join(tmpDir, `input-body-${requestId}.txt`);
+    prepareBodyStream: (requestId, tmpDir, prefix = null) => {
+      const reqBodyFile = path.join(tmpDir, `${prefix}input-body-${requestId}.txt`);
       let reqBody;
       fs.writeFileSync(reqBodyFile, reqBody = chance.sentence());
       return {
@@ -32,8 +32,8 @@ module.exports = {
         ],
       });
     },
-    response: () => (
-      {
+    response: (bodyStream) => (
+      _.merge(bodyStream, {
         httpVersion: chance.http.httpVersion(),
         statusCode: chance.integer({ min: 100, max: 599 }),
         statusMessage: chance.sentence({ words: 3 }),
@@ -42,7 +42,7 @@ module.exports = {
           'X-Header-2', `header-2-${chance.word()}`,
           'X-Header-3', `header-3-${chance.word()}`,
         ],
-      }
+      })
     ),
   },
 };
