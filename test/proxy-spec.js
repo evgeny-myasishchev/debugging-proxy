@@ -5,6 +5,7 @@ const chance = require('chance')();
 const config = require('config');
 const fs = require('fs');
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const proxy = require('../lib/proxyv2');
 const reflect = require('async/reflect');
@@ -23,7 +24,37 @@ describe('proxy', () => {
     streamsDir,
   });
 
+  let proxyServer;
+  let fakePostData;
+  let fakeRespBody;
+  let fakeRespHeader;
+  let fakeReqHeader;
+  let r;
+
+  const requestProcessor = (req, res) =>
+    streams.toBuffer(req, (err, buffer) => {
+      try {
+        if (err) throw err;
+        expect(req.headers['x-custom-req-header'], 'received unexpected headers').to.eql(fakeReqHeader);
+        expect(buffer.toString(), 'received unexpected post body').to.eql(fakePostData);
+      } catch (e) {
+        _.set(res, 'statusCode', 400);
+        _.set(res, 'statusMessage', 'assertion failed');
+        return res.end(e.message);
+      }
+
+      res.setHeader('X-Custom-Res-Header', fakeRespHeader = chance.word());
+      return res.end(fakeRespBody = chance.sentence());
+    });
+
   beforeEach((done) => {
+    fakePostData = chance.sentence();
+    fakeReqHeader = chance.word();
+    r = request.defaults({
+      headers: { 'X-Custom-Req-Header': fakeReqHeader },
+      proxy: `http://localhost:${config.port}`,
+      rejectUnauthorized: false,
+    });
     async.waterfall([
       reflect(async.apply(fs.stat, tmpDir)),
       (res, next) => {
@@ -32,74 +63,100 @@ describe('proxy', () => {
       },
       async.apply(fs.mkdir, tmpDir),
       async.apply(fs.mkdir, streamsDir),
+      (next) => proxy.startServer(storage, _.pick(config, ['port', 'httpsPort', 'ssl']), (err, srv) => {
+        proxyServer = srv;
+        return next(err);
+      }),
     ], done);
   });
 
   afterEach((done) => {
-    storage.db.remove({}, done);
+    async.parallel([
+      (next) => storage.db.remove({}, next),
+      (next) => {
+        if (proxyServer) proxyServer.close(next);
+        else next();
+      },
+    ], done);
   });
 
+  const assertCommon = (res, body, cb) => {
+    expect(res.statusCode, body).to.eql(200);
+    expect(res.headers['x-custom-res-header']).to.eql(fakeRespHeader);
+    expect(body).to.eql(fakeRespBody);
+
+    async.waterfall([
+      (next) => storage.getRequests(next),
+      (requests, next) => {
+        expect(requests.length).to.eql(1);
+        const req = requests[0];
+        expect(_.find(req.request.headers, { key: 'X-Custom-Req-Header' }).value).to.eql(fakeReqHeader);
+        expect(_.find(req.response.headers, { key: 'X-Custom-Res-Header' }).value).to.eql(fakeRespHeader);
+        const reqId = _.get(req, '_id');
+
+          // Making sure req/res body is saved
+        async.waterfall([
+          (next1) => streams.toBuffer(storage.createRequestBodyStream(reqId), next1),
+          (reqData, next1) => {
+            expect(reqData.toString()).to.eql(fakePostData);
+            next1();
+          },
+          (next1) => streams.toBuffer(storage.createResponseBodyStream(reqId), next1),
+          (respData, next1) => {
+            expect(respData.toString()).to.eql(fakeRespBody);
+            next1();
+          },
+        ], next);
+      },
+    ], cb);
+  };
 
   describe('http', () => {
     let server;
     const port = 45001;
-    let fakeRespBody;
-    let fakeRespHeader;
-    const r = request.defaults({ proxy: `http://localhost:${config.port}` });
+
     beforeEach((done) => {
-      server = http.createServer((req, res) => {
-        res.setHeader('X-Custom-Res-Header', fakeRespHeader = chance.word());
-        res.end(fakeRespBody = chance.sentence());
-      });
-      async.parallel([
-        (next) => server.listen(port, next),
-        (next) => proxy.listen(storage, _.pick(config, ['port', 'ssl']), next),
-      ], done);
+      server = http.createServer(requestProcessor).listen(port, done);
     });
 
     afterEach((done) => {
-      async.parallel([
-        (next) => server.close(next),
-        (next) => proxy.close(next),
-      ], done);
+      if (server) server.close(done);
+      else done();
     });
 
     it('should save http request/response', (done) => {
-      const fakePostData = chance.sentence();
-      const fakeReqHeader = chance.word();
       async.waterfall([
         async.apply(r.post, `http://localhost:${port}`, {
-          headers: {
-            'X-Custom-Req-Header': fakeReqHeader,
-          },
           body: fakePostData,
         }),
-        (res, body, next) => {
-          expect(res.headers['x-custom-res-header']).to.eql(fakeRespHeader);
-          expect(body).to.eql(fakeRespBody);
-          storage.getRequests(next);
-        },
-        (requests, next) => {
-          expect(requests.length).to.eql(1);
-          const req = requests[0];
-          expect(_.find(req.request.headers, { key: 'X-Custom-Req-Header' }).value).to.eql(fakeReqHeader);
-          expect(_.find(req.response.headers, { key: 'X-Custom-Res-Header' }).value).to.eql(fakeRespHeader);
-          const reqId = _.get(req, '_id');
+        assertCommon,
+      ], done);
+    });
+  });
 
-          // Making sure req/res body is saved
-          async.waterfall([
-            (next1) => streams.toBuffer(storage.createRequestBodyStream(reqId), next1),
-            (reqData, next1) => {
-              expect(reqData.toString()).to.eql(fakePostData);
-              next1();
-            },
-            (next1) => streams.toBuffer(storage.createResponseBodyStream(reqId), next1),
-            (respData, next1) => {
-              expect(respData.toString()).to.eql(fakeRespBody);
-              next1();
-            },
-          ], next);
-        },
+  xdescribe('https', () => {
+    let server;
+    const port = 45002;
+
+    beforeEach((done) => {
+      const httpsCfg = {
+        key: fs.readFileSync(config.ssl.key),
+        cert: fs.readFileSync(config.ssl.cert),
+      };
+      server = https.createServer(httpsCfg, requestProcessor).listen(port, done);
+    });
+
+    afterEach((done) => {
+      if (server) server.close(done);
+      else done();
+    });
+
+    it('should save http request/response', (done) => {
+      async.waterfall([
+        async.apply(r.post, `https://localhost:${port}`, {
+          body: fakePostData,
+        }),
+        assertCommon,
       ], done);
     });
   });
