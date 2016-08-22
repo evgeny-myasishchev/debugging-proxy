@@ -63,7 +63,7 @@ describe('proxy', () => {
       },
       async.apply(fs.mkdir, tmpDir),
       async.apply(fs.mkdir, streamsDir),
-      (next) => proxy.startServer(storage, _.pick(config, ['port', 'httpsPort', 'ssl']), (err, srv) => {
+      (next) => proxy.startServer(storage, _.pick(config, ['port', 'httpsPort', 'verifyHttpsCertificate', 'ssl']), (err, srv) => {
         proxyServer = srv;
         return next(err);
       }),
@@ -134,7 +134,7 @@ describe('proxy', () => {
     });
   });
 
-  xdescribe('https', () => {
+  describe('https', () => {
     let server;
     const port = 45002;
 

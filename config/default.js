@@ -1,6 +1,7 @@
 module.exports = {
   port: process.env.PORT || 8080,
   httpsPort: process.env.HTTPS_PORT || 44443,
+  verifyHttpsCertificate: true,
   ssl: {
     key: './config/ssl/key.pem',
     cert: './config/ssl/cert.pem',
