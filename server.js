@@ -1,7 +1,7 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 const config = require('config');
 const fs = require('fs');
-const proxy = require('./lib/proxyv2');
+const proxy = require('./lib/proxy');
 const Storage = require('./lib/Storage');
 
 const opts = {
