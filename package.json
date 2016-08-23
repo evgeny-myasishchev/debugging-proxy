@@ -10,7 +10,8 @@
     "http-proxy": "^1.14.0",
     "lodash": "~4.15.0",
     "nedb": "^1.8.0",
-    "uuid": "^2.0.2"
+    "uuid": "^2.0.2",
+    "express": "~4.14.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",

@@ -1,6 +1,7 @@
 module.exports = {
-  port: process.env.PORT || 8080,
-  httpsPort: process.env.HTTPS_PORT || 44443,
+  apiPort: 3000,
+  port: process.env.PORT || 8080, // TOOD: Rename to proxyPort
+  httpsPort: process.env.HTTPS_PORT || 44443, // TOOD: decodingHttpsPort
   verifyHttpsCertificate: true,
   ssl: {
     key: './config/ssl/key.pem',
