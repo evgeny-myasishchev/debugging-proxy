@@ -7,11 +7,11 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
-const proxy = require('../lib/proxy');
+const proxy = require('../app/proxy');
 const reflect = require('async/reflect');
 const request = require('request');
 const rimraf = require('rimraf');
-const Storage = require('../lib/Storage');
+const Storage = require('../app/models/Storage');
 const streams = require('./support/streams');
 
 const expect = chai.expect;

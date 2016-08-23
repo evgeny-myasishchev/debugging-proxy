@@ -2,13 +2,13 @@ const _ = require('lodash');
 const async = require('async');
 const chai = require('chai');
 const chance = require('chance')();
-const chanceMixin = require('./support/chanceMixin');
+const chanceMixin = require('../support/chanceMixin');
 const fs = require('fs');
 const path = require('path');
 const reflect = require('async/reflect');
 const rimraf = require('rimraf');
-const Storage = require('../lib/Storage');
-const streams = require('./support/streams');
+const Storage = require('../../app/models/Storage');
+const streams = require('../support/streams');
 const url = require('url');
 const uuid = require('uuid');
 
@@ -16,7 +16,7 @@ const expect = chai.expect;
 chance.mixin(chanceMixin);
 
 describe('storage', () => {
-  const tmpDir = path.normalize(path.join(__dirname, '..', 'tmp', 'storage-spec'));
+  const tmpDir = path.normalize(path.join(__dirname, '..', '..', 'tmp', 'storage-spec'));
   const streamsDir = path.normalize(path.join(tmpDir, 'streams-dir'));
   const storage = new Storage({
     inMemoryOnly: true,
