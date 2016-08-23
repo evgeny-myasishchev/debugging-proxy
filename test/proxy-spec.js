@@ -30,22 +30,8 @@ describe('proxy', () => {
   let fakeRespHeader;
   let fakeReqHeader;
   let r;
-
-  const requestProcessor = (req, res) =>
-    streams.toBuffer(req, (err, buffer) => {
-      try {
-        if (err) throw err;
-        expect(req.headers['x-custom-req-header'], 'received unexpected headers').to.eql(fakeReqHeader);
-        expect(buffer.toString(), 'received unexpected post body').to.eql(fakePostData);
-      } catch (e) {
-        _.set(res, 'statusCode', 400);
-        _.set(res, 'statusMessage', 'assertion failed');
-        return res.end(e.message);
-      }
-
-      res.setHeader('X-Custom-Res-Header', fakeRespHeader = chance.word());
-      return res.end(fakeRespBody = chance.sentence());
-    });
+  let server;
+  const port = chance.integer({ min: 45001, max: 50000 });
 
   beforeEach((done) => {
     fakePostData = chance.sentence();
@@ -80,6 +66,22 @@ describe('proxy', () => {
     ], done);
   });
 
+  const commonProcessRequest = (req, res) =>
+    streams.toBuffer(req, (err, buffer) => {
+      try {
+        if (err) throw err;
+        expect(req.headers['x-custom-req-header'], 'received unexpected headers').to.eql(fakeReqHeader);
+        expect(buffer.toString(), 'received unexpected post body').to.eql(fakePostData);
+      } catch (e) {
+        _.set(res, 'statusCode', 400);
+        _.set(res, 'statusMessage', 'assertion failed');
+        return res.end(e.message);
+      }
+
+      res.setHeader('X-Custom-Res-Header', fakeRespHeader = chance.word());
+      return res.end(fakeRespBody = chance.sentence());
+    });
+
   const assertCommon = (res, body, cb) => {
     expect(res.statusCode, body).to.eql(200);
     expect(res.headers['x-custom-res-header']).to.eql(fakeRespHeader);
@@ -112,19 +114,17 @@ describe('proxy', () => {
   };
 
   describe('http', () => {
-    let server;
-    const port = 45001;
-
     beforeEach((done) => {
-      server = http.createServer(requestProcessor).listen(port, done);
+      server = http.createServer().listen(port, done);
     });
 
     afterEach((done) => {
-      if (server) server.close(done);
-      else done();
+      server.close(done);
+      server = null;
     });
 
     it('should save http request/response', (done) => {
+      server.on('request', commonProcessRequest);
       async.waterfall([
         async.apply(r.post, `http://localhost:${port}`, {
           body: fakePostData,
@@ -132,31 +132,54 @@ describe('proxy', () => {
         assertCommon,
       ], done);
     });
+
+    it('should handle nested paths', (done) => {
+      server.on('request', (req, res) => res.end(JSON.stringify({ url: req.url })));
+      async.waterfall([
+        async.apply(r.get, `http://localhost:${port}/v1/nested-path`),
+        (res, body, next) => {
+          const data = JSON.parse(body);
+          expect(data.url).to.eql('/v1/nested-path');
+          return next();
+        },
+      ], done);
+    });
   });
 
   describe('https', () => {
-    let server;
-    const port = 45002;
+    const httpsCfg = {
+      key: fs.readFileSync(config.ssl.key),
+      cert: fs.readFileSync(config.ssl.cert),
+    };
 
     beforeEach((done) => {
-      const httpsCfg = {
-        key: fs.readFileSync(config.ssl.key),
-        cert: fs.readFileSync(config.ssl.cert),
-      };
-      server = https.createServer(httpsCfg, requestProcessor).listen(port, done);
+      server = https.createServer(httpsCfg).listen(port, done);
     });
 
     afterEach((done) => {
-      if (server) server.close(done);
-      else done();
+      server.close(done);
+      server = null;
     });
 
     it('should save http request/response', (done) => {
+      server.on('request', commonProcessRequest);
       async.waterfall([
         async.apply(r.post, `https://localhost:${port}`, {
           body: fakePostData,
         }),
         assertCommon,
+      ], done);
+    });
+
+    it('should handle nested paths', (done) => {
+      server.on('request', (req, res) => res.end(JSON.stringify({ url: req.url })));
+      async.waterfall([
+        async.apply(r.get, `https://localhost:${port}/v1/nested-path`),
+        (res, body, next) => {
+          const data = JSON.parse(body);
+          expect(data.url).to.eql('/v1/nested-path');
+          return next();
+        },
       ], done);
     });
   });
