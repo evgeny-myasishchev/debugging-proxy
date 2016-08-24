@@ -31,7 +31,13 @@ function forwardRequest(targetUrl, proxy, storage, req, res) {
   req.reqId = reqId; // eslint-disable-line no-param-reassign
   req.log = log; // eslint-disable-line no-param-reassign
   log.debug(`Request started. Saving and forwarding to: ${`${targetUrlStr}`}`);
-  storage.saveRequest(reqId, req, _.curry(handleSaveError, log));
+  const params = {
+    requestId: reqId,
+    request: req,
+    host: targetUrl.host,
+    protocol: targetUrl.protocol.substr(0, targetUrl.protocol.length - 1), // it is "http:" but we need just "http"
+  };
+  storage.saveRequest(params, _.curry(handleSaveError, log));
   proxy.web(req, res, { target: targetUrlStr });
 }
 

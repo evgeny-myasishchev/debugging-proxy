@@ -10,11 +10,13 @@ const streams = require('../support/streams');
 const url = require('url');
 const uuid = require('uuid');
 const tmpHelper = require('../support/tmpHelper');
+const logging = require('../support/logging');
 
 const expect = chai.expect;
 chance.mixin(chanceMixin);
 
 describe('storage', () => {
+  logging.hook();
   const tmpDir = path.normalize(path.join(__dirname, '..', '..', 'tmp', 'storage-spec'));
   const streamsDir = path.normalize(path.join(tmpDir, 'streams-dir'));
   const storage = new Storage({
@@ -162,13 +164,16 @@ describe('storage', () => {
     });
 
     it('should save request with headers', (done) => {
+      const protocol = chance.http.protocol();
+      const host = chance.domain();
       const requestUrl = url.parse(request.url);
       async.waterfall([
-        (next) => storage.saveRequest(requestId, request, next),
+        (next) => storage.saveRequest({ requestId, request, host, protocol }, next),
         (next) => db.findOne({ _id: requestId }, next),
         (data, next) => {
           const reqData = data.request;
-          expect(reqData.host).to.eql(requestUrl.host);
+          expect(reqData.protocol).to.eql(protocol);
+          expect(reqData.host).to.eql(host);
           expect(reqData.method).to.eql(request.method);
           expect(reqData.path).to.eql(requestUrl.path);
           expect(reqData.httpVersion).to.eql(request.httpVersion);
@@ -181,7 +186,7 @@ describe('storage', () => {
 
     it('should save request body into streams dir', (done) => {
       async.waterfall([
-        (next) => storage.saveRequest(requestId, request, next),
+        (next) => storage.saveRequest({ requestId, request, host: chance.domain(), protocol: chance.http.protocol() }, next),
         (next) => {
           const reqFile = path.join(streamsDir, `${requestId}-req.txt`);
           expect(fs.existsSync(reqFile), `Req body has not been saved to ${reqFile}`).to.eql(true);

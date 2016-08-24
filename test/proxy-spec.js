@@ -6,15 +6,19 @@ const config = require('config');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
+const logging = require('./support/logging');
 const path = require('path');
 const proxy = require('../app/proxy');
 const request = require('request');
+const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
 const Storage = require('../app/models/Storage');
 const streams = require('./support/streams');
 const tmpHelper = require('./support/tmpHelper');
-const logging = require('./support/logging');
+const url = require('url');
 
 const expect = chai.expect;
+chai.use(sinonChai);
 
 describe('proxy', () => {
   logging.hook(this);
@@ -34,6 +38,7 @@ describe('proxy', () => {
   let r;
   let server;
   const port = chance.integer({ min: 45001, max: 50000 });
+  const sandbox = sinon.sandbox.create();
 
   tmpHelper.maintain(tmpDir);
 
@@ -45,6 +50,8 @@ describe('proxy', () => {
       proxy: `http://localhost:${config.port}`,
       rejectUnauthorized: false,
     });
+    sandbox.spy(storage, 'saveRequest');
+    sandbox.spy(storage, 'saveResponse');
     async.waterfall([
       async.apply(fs.mkdir, streamsDir),
       (next) => proxy.startServer(storage, _.pick(config, ['port', 'httpsPort', 'verifyHttpsCertificate', 'ssl']), (err, srv) => {
@@ -55,6 +62,7 @@ describe('proxy', () => {
   });
 
   afterEach((done) => {
+    sandbox.restore();
     async.parallel([
       (next) => storage.db.remove({}, next),
       (next) => {
@@ -80,7 +88,8 @@ describe('proxy', () => {
       return res.end(fakeRespBody = chance.sentence());
     });
 
-  const assertCommon = (res, body, cb) => {
+  const assertCommon = (targetUrl, res, body, cb) => {
+    const parsedTargetUrl = url.parse(targetUrl);
     expect(res.statusCode, body).to.eql(200);
     expect(res.headers['x-custom-res-header']).to.eql(fakeRespHeader);
     expect(body).to.eql(fakeRespBody);
@@ -93,6 +102,13 @@ describe('proxy', () => {
         expect(_.find(req.request.headers, { key: 'X-Custom-Req-Header' }).value).to.eql(fakeReqHeader);
         expect(_.find(req.response.headers, { key: 'X-Custom-Res-Header' }).value).to.eql(fakeRespHeader);
         const reqId = _.get(req, '_id');
+
+        expect(storage.saveRequest).to.have.been.calledWith({
+          requestId: reqId,
+          request: sinon.match.any,
+          host: parsedTargetUrl.host,
+          protocol: parsedTargetUrl.protocol.substr(0, parsedTargetUrl.protocol.length - 1),
+        });
 
           // Making sure req/res body is saved
         async.waterfall([
@@ -122,12 +138,13 @@ describe('proxy', () => {
     });
 
     it('should save http request/response', (done) => {
+      const targetUrl = `http://localhost:${port}`;
       server.on('request', commonProcessRequest);
       async.waterfall([
-        async.apply(r.post, `http://localhost:${port}`, {
+        async.apply(r.post, targetUrl, {
           body: fakePostData,
         }),
-        assertCommon,
+        _.curry(assertCommon)(targetUrl),
       ], done);
     });
 
@@ -160,12 +177,13 @@ describe('proxy', () => {
     });
 
     it('should save http request/response', (done) => {
+      const targetUrl = `https://localhost:${port}`;
       server.on('request', commonProcessRequest);
       async.waterfall([
-        async.apply(r.post, `https://localhost:${port}`, {
+        async.apply(r.post, targetUrl, {
           body: fakePostData,
         }),
-        assertCommon,
+        _.curry(assertCommon)(targetUrl),
       ], done);
     });
 

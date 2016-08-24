@@ -7,6 +7,7 @@ const uuid = require('uuid');
 
 module.exports = {
   http: {
+    protocol: () => chance.pick(['https', 'http']),
     method: () => chance.pick(['GET', 'POST', 'PUT', 'DELETE']),
     httpVersion: () => chance.pick(['1.0', '1.1', '2.0']),
     prepareBodyStream: (requestId, tmpDir, prefix = '') => {
@@ -33,7 +34,7 @@ module.exports = {
       const requestUrl = url.parse(`${chance.url()}?key1=${chance.word()}&key2=${chance.word()}`);
       return _.merge(bodyStream, {
         method: chance.http.method(),
-        url: requestUrl.href,
+        url: requestUrl.path,
         httpVersion: chance.http.httpVersion(),
         rawHeaders: [
           'Host', requestUrl.host,

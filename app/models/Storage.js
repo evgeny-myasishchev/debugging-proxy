@@ -35,11 +35,12 @@ class Storage {
     return fs.createReadStream(streamPath);
   }
 
-  saveRequest(requestId, request, cb) {
+  saveRequest({ requestId, request, host, protocol }, cb) {
     const log = logger.child({ reqId: requestId });
-    const reqUrl = url.parse(request.url);
+    const reqUrl = url.parse(request.url); // request.url will have the path in most cases but anyway parsing to make sure
     const data = {
-      host: reqUrl.host,
+      protocol,
+      host,
       method: request.method,
       path: reqUrl.path,
       httpVersion: request.httpVersion,
