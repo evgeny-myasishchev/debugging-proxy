@@ -12,7 +12,6 @@ class Storage {
       inMemoryOnly: cfg.inMemoryOnly,
       filename: cfg.filename,
       autoload: true,
-      saveBody: true, // TODO: Implement
     });
     this.streamsDir = cfg.streamsDir;
     logger.info(cfg, 'Storage initialized');
