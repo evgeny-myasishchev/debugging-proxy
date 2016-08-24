@@ -12,10 +12,13 @@ const request = require('request');
 const Storage = require('../app/models/Storage');
 const streams = require('./support/streams');
 const tmpHelper = require('./support/tmpHelper');
+const logging = require('./support/logging');
 
 const expect = chai.expect;
 
 describe('proxy', () => {
+  logging.hook(this);
+
   const tmpDir = path.normalize(path.join(__dirname, '..', 'tmp', 'proxy-spec'));
   const streamsDir = path.normalize(path.join(tmpDir, 'streams-dir'));
   const storage = new Storage({
