@@ -13,6 +13,16 @@ function create(storage) {
     });
   });
 
+  router.get('/api/v1/requests/:requestId', (req, res) => {
+    const stream = storage.createRequestBodyStream(req.params.requestId);
+    stream.pipe(res);
+  });
+
+  router.get('/api/v1/requests/:requestId/response', (req, res) => {
+    const stream = storage.createResponseBodyStream(req.params.requestId);
+    stream.pipe(res);
+  });
+
   router.delete('/api/v1/requests', (req, res) => {
     storage.purge((err) => {
       if (err) {

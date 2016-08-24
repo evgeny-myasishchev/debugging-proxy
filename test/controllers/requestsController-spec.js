@@ -104,4 +104,42 @@ describe('requestsController', () => {
         .end(done);
     });
   });
+
+  describe('GET /api/v1/requests/:requestId', () => {
+    it('should send request body', (done) => {
+      const req1 = chance.http.requestWithBody(tmpDir);
+      const req2 = chance.http.requestWithBody(tmpDir);
+      async.waterfall([
+        async.apply(async.each, [req1, req2], (req, next) => storage.saveRequest(req.meta.id, req, next)),
+        (next) => request(server)
+          .get(`/api/v1/requests/${req1.meta.id}`)
+          .expect(200)
+          .expect((res) => {
+            expect(res.text).to.eql(req1.meta.body.data);
+          })
+          .end(next),
+      ], done);
+    });
+  });
+
+  describe('GET /api/v1/requests/:requestId/response', () => {
+    it('should send request body', (done) => {
+      const req1 = chance.http.requestWithBody(tmpDir);
+      const req2 = chance.http.requestWithBody(tmpDir);
+      const res1 = chance.http.responseWithBody(req1.meta.id, tmpDir);
+      const res2 = chance.http.responseWithBody(req2.meta.id, tmpDir);
+      async.waterfall([
+        async.apply(async.each, [req1, req2], (req, next) => storage.saveRequest(req.meta.id, req, next)),
+        (next) => storage.saveResponse(req1.meta.id, res1, next),
+        (next) => storage.saveResponse(req2.meta.id, res2, next),
+        (next) => request(server)
+          .get(`/api/v1/requests/${req1.meta.id}/response`)
+          .expect(200)
+          .expect((res) => {
+            expect(res.text).to.eql(res1.meta.body.data);
+          })
+          .end(next),
+      ], done);
+    });
+  });
 });
