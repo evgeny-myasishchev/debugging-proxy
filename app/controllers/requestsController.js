@@ -14,11 +14,13 @@ function create(storage) {
   });
 
   router.get('/api/v1/requests/:requestId', (req, res) => {
+    // TODO: Return 404 if no such request. Include content type.
     const stream = storage.createRequestBodyStream(req.params.requestId);
     stream.pipe(res);
   });
 
   router.get('/api/v1/requests/:requestId/response', (req, res) => {
+    // TODO: Return 404 if no such request. Include content type.
     const stream = storage.createResponseBodyStream(req.params.requestId);
     stream.pipe(res);
   });
