@@ -8,7 +8,7 @@ const Storage = require('./app/models/Storage');
 const logger = require('./app/lib/logger').get();
 const bunyanMiddleware = require('bunyan-middleware');
 
-function startProxy(cb) {
+function startProxy(storage, cb) {
   const opts = {
     port: config.port,
     httpsPort: config.httpsPort,
@@ -25,11 +25,10 @@ function startProxy(cb) {
     if (e.code !== 'EEXIST') throw e;
   }
 
-  const storage = new Storage(config.get('storage'));
   proxy.startServer(storage, opts, cb);
 }
 
-function startApiLayer(cb) {
+function startApiLayer(storage, cb) {
   const apiLogger = logger.child({ module: 'api' });
   const app = express();
   app.use(bunyanMiddleware(
@@ -40,16 +39,17 @@ function startApiLayer(cb) {
       requestStart: true,
       logger: apiLogger,
     }));
-  app.use(requestsController.create());
+  app.use(requestsController.create(storage));
   apiLogger.info('Starting API layer on port:', config.apiPort);
   const server = app.listen(config.apiPort);
   return cb(null, server);
 }
 
 function start(cb) {
+  const storage = new Storage(config.get('storage'));
   async.series([
-    async.apply(startProxy),
-    async.apply(startApiLayer),
+    async.apply(startProxy, storage),
+    async.apply(startApiLayer, storage),
   ], cb);
 }
 
