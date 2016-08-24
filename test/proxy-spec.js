@@ -8,11 +8,10 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 const proxy = require('../app/proxy');
-const reflect = require('async/reflect');
 const request = require('request');
-const rimraf = require('rimraf');
 const Storage = require('../app/models/Storage');
 const streams = require('./support/streams');
+const tmpHelper = require('./support/tmpHelper');
 
 const expect = chai.expect;
 
@@ -33,6 +32,8 @@ describe('proxy', () => {
   let server;
   const port = chance.integer({ min: 45001, max: 50000 });
 
+  tmpHelper.maintain(tmpDir);
+
   beforeEach((done) => {
     fakePostData = chance.sentence();
     fakeReqHeader = chance.word();
@@ -42,12 +43,6 @@ describe('proxy', () => {
       rejectUnauthorized: false,
     });
     async.waterfall([
-      reflect(async.apply(fs.stat, tmpDir)),
-      (res, next) => {
-        if (res.error) return next(res.error.code === 'ENOENT' ? null : res.error);
-        return rimraf(tmpDir, next);
-      },
-      async.apply(fs.mkdir, tmpDir),
       async.apply(fs.mkdir, streamsDir),
       (next) => proxy.startServer(storage, _.pick(config, ['port', 'httpsPort', 'verifyHttpsCertificate', 'ssl']), (err, srv) => {
         proxyServer = srv;
