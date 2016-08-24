@@ -11,6 +11,7 @@ const root = bunyan.createLogger({
   level: 'debug',
   name: logCfg.get('name'),
   streams,
+  env: process.env.NODE_ENV,
 });
 
 module.exports = {
