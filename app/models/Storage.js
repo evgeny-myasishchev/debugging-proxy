@@ -12,6 +12,7 @@ class Storage {
       inMemoryOnly: cfg.inMemoryOnly,
       filename: cfg.filename,
       autoload: true,
+      saveBody: true, // TODO: Implement
     });
     this.streamsDir = cfg.streamsDir;
     logger.info(cfg, 'Storage initialized');
@@ -91,6 +92,14 @@ class Storage {
         }
         return next();
       }),
+    ], _.unary(cb));
+  }
+
+  purge(cb) {
+    async.waterfall([
+      (next) => this.db.remove({}, { multi: true }, _.unary(next)),
+      (next) => fs.readdir(this.streamsDir, next),
+      (files, next) => async.each(files, (file, removed) => fs.unlink(path.join(this.streamsDir, file), removed), next),
     ], _.unary(cb));
   }
 }

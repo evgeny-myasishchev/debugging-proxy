@@ -130,6 +130,33 @@ describe('storage', () => {
     });
   });
 
+  describe('purge', () => {
+    it('should remove all the data and streams', (done) => {
+      const req1 = chance.http.requestWithBody(tmpDir);
+      const res1 = chance.http.responseWithBody(req1.meta.id, tmpDir);
+      const req2 = chance.http.requestWithBody(tmpDir);
+      const res2 = chance.http.responseWithBody(req2.meta.id, tmpDir);
+      async.waterfall([
+        async.apply(async.waterfall, [
+          (next) => storage.saveRequest(req1.meta.id, req1, next),
+          (next) => storage.saveResponse(req1.meta.id, res1, next),
+          (next) => storage.saveRequest(req2.meta.id, req2, next),
+          (next) => storage.saveResponse(req2.meta.id, res2, next),
+        ]),
+        (next) => storage.purge(next),
+        (next) => storage.getRequests(next),
+        (requests, next) => {
+          expect(requests.length, 'Requests has not been removed').to.eql(0);
+          fs.readdir(streamsDir, next);
+        },
+        (files, next) => {
+          expect(files.length, 'Streams has not been removed').to.eql(0);
+          next();
+        },
+      ], done);
+    });
+  });
+
   describe('saveRequest', () => {
     let request;
     let fakeBody;
