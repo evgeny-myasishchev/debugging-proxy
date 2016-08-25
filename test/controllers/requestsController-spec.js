@@ -50,19 +50,19 @@ describe('requestsController', () => {
   describe('GET /api/v1/requests', () => {
     it('should get all requests from storage and return them', (done) => {
       sandbox.spy(storage, 'getRequests');
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
-      const req3 = chance.http.requestWithBody(tmpDir);
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
+      const req3 = chance.http.saveRequestParams(tmpDir);
       async.waterfall([
-        async.apply(async.each, [req1, req2, req3], (req, next) => storage.saveRequest(req.meta.id, req, next)),
+        async.apply(async.each, [req1, req2, req3], (req, next) => storage.saveRequest(req, next)),
         (next) => request(server)
           .get('/api/v1/requests')
           .expect(200)
           .expect((res) => {
             expect(res.body.length).to.eql(3);
-            expect(_.find(res.body, { _id: req1.meta.id })).not.to.be.an('undefined');
-            expect(_.find(res.body, { _id: req2.meta.id })).not.to.be.an('undefined');
-            expect(_.find(res.body, { _id: req3.meta.id })).not.to.be.an('undefined');
+            expect(_.find(res.body, { _id: req1.requestId })).not.to.be.an('undefined');
+            expect(_.find(res.body, { _id: req2.requestId })).not.to.be.an('undefined');
+            expect(_.find(res.body, { _id: req3.requestId })).not.to.be.an('undefined');
             expect(storage.getRequests).to.have.callCount(1);
           })
           .end(next),
@@ -81,11 +81,11 @@ describe('requestsController', () => {
   describe('DELETE /api/v1/requests', () => {
     it('should purge storage', (done) => {
       sandbox.spy(storage, 'purge');
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
-      const req3 = chance.http.requestWithBody(tmpDir);
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
+      const req3 = chance.http.saveRequestParams(tmpDir);
       async.waterfall([
-        async.apply(async.each, [req1, req2, req3], (req, next) => storage.saveRequest(req.meta.id, req, next)),
+        async.apply(async.each, [req1, req2, req3], (req, next) => storage.saveRequest(req, next)),
         (next) => request(server)
           .delete('/api/v1/requests')
           .expect(200)
@@ -107,15 +107,15 @@ describe('requestsController', () => {
 
   describe('GET /api/v1/requests/:requestId', () => {
     it('should send request body', (done) => {
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
       async.waterfall([
-        async.apply(async.each, [req1, req2], (req, next) => storage.saveRequest(req.meta.id, req, next)),
+        async.apply(async.each, [req1, req2], (req, next) => storage.saveRequest(req, next)),
         (next) => request(server)
-          .get(`/api/v1/requests/${req1.meta.id}`)
+          .get(`/api/v1/requests/${req1.requestId}`)
           .expect(200)
           .expect((res) => {
-            expect(res.text).to.eql(req1.meta.body.data);
+            expect(res.text).to.eql(req1.request.meta.body.data);
           })
           .end(next),
       ], done);
@@ -124,16 +124,16 @@ describe('requestsController', () => {
 
   describe('GET /api/v1/requests/:requestId/response', () => {
     it('should send request body', (done) => {
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
-      const res1 = chance.http.responseWithBody(req1.meta.id, tmpDir);
-      const res2 = chance.http.responseWithBody(req2.meta.id, tmpDir);
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
+      const res1 = chance.http.responseWithBody(req1.requestId, tmpDir);
+      const res2 = chance.http.responseWithBody(req2.requestId, tmpDir);
       async.waterfall([
-        async.apply(async.each, [req1, req2], (req, next) => storage.saveRequest(req.meta.id, req, next)),
-        (next) => storage.saveResponse(req1.meta.id, res1, next),
-        (next) => storage.saveResponse(req2.meta.id, res2, next),
+        async.apply(async.each, [req1, req2], (req, next) => storage.saveRequest(req, next)),
+        (next) => storage.saveResponse(req1.requestId, res1, next),
+        (next) => storage.saveResponse(req2.requestId, res2, next),
         (next) => request(server)
-          .get(`/api/v1/requests/${req1.meta.id}/response`)
+          .get(`/api/v1/requests/${req1.requestId}/response`)
           .expect(200)
           .expect((res) => {
             expect(res.text).to.eql(res1.meta.body.data);

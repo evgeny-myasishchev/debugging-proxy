@@ -20,15 +20,24 @@ module.exports = {
         data: reqBody,
       };
     },
+    saveRequestParams: (tmpDir) => {
+      const request = chance.http.requestWithBody(tmpDir);
+      return {
+        requestId: request.meta.id,
+        request,
+        host: request.meta.url.host,
+        protocol: _.trimEnd(request.meta.url.protocol, ':'),
+      };
+    },
     requestWithBody: (tmpDir) => {
       const requestId = uuid.v4();
       const body = chance.http.prepareBodyStream(requestId, tmpDir, 'request-');
-      const request = chance.http.request(body.stream);
-      request.meta = {
-        id: requestId,
-        body,
-      };
-      return request;
+      return _.merge(chance.http.request(body.stream), {
+        meta: {
+          id: requestId,
+          body,
+        },
+      });
     },
     request: (bodyStream) => {
       const requestUrl = url.parse(`${chance.url()}?key1=${chance.word()}&key2=${chance.word()}`);
@@ -42,6 +51,9 @@ module.exports = {
           'X-Header-2', `header-2-${chance.word()}`,
           'X-Header-3', `header-3-${chance.word()}`,
         ],
+        meta: {
+          url: requestUrl,
+        },
       });
     },
     responseWithBody: (requestId, tmpDir) => {

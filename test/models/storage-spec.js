@@ -37,38 +37,37 @@ describe('storage', () => {
 
   describe('getRequests', () => {
     it('should get all saved requests', (done) => {
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
-
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
       async.waterfall([
         async.apply(async.parallel, [
-          (next) => storage.saveRequest(req1.meta.id, req1, next),
-          (next) => storage.saveRequest(req2.meta.id, req2, next),
+          (next) => storage.saveRequest(req1, next),
+          (next) => storage.saveRequest(req2, next),
         ]),
         (res, next) => storage.getRequests(next),
         (requests, next) => {
           expect(requests.length).to.eql(2);
-          const actualReq1 = _.find(requests, _.matches({ _id: req1.meta.id }));
-          expect(actualReq1.request.path).to.eql(url.parse(req1.url).path);
-          const actualReq2 = _.find(requests, _.matches({ _id: req2.meta.id }));
-          expect(actualReq2.request.path).to.eql(url.parse(req2.url).path);
+          const actualReq1 = _.find(requests, _.matches({ _id: req1.requestId }));
+          expect(actualReq1.request.path).to.eql(req1.request.meta.url.path);
+          const actualReq2 = _.find(requests, _.matches({ _id: req2.requestId }));
+          expect(actualReq2.request.path).to.eql(req2.request.meta.url.path);
           next();
         },
       ], done);
     });
 
     it('should include response', (done) => {
-      const request = chance.http.requestWithBody(tmpDir);
-      const response = chance.http.responseWithBody(request.meta.id, tmpDir);
+      const request = chance.http.saveRequestParams(tmpDir);
+      const response = chance.http.responseWithBody(request.requestId, tmpDir);
       async.waterfall([
         async.apply(async.waterfall, [
-          (next) => storage.saveRequest(request.meta.id, request, next),
-          (next) => storage.saveResponse(request.meta.id, response, next),
+          (next) => storage.saveRequest(request, next),
+          (next) => storage.saveResponse(request.requestId, response, next),
         ]),
         (next) => storage.getRequests(next),
         (requests, next) => {
-          const req = _.find(requests, _.matches({ _id: request.meta.id }));
-          expect(req.request.path).to.eql(url.parse(request.url).path);
+          const req = _.find(requests, _.matches({ _id: request.requestId }));
+          expect(req.request.path).to.eql(request.request.meta.url.path);
           expect(req.response.statusCode).to.eql(response.statusCode);
           expect(req.response.statusMessage).to.eql(response.statusMessage);
           next();
@@ -79,20 +78,20 @@ describe('storage', () => {
 
   describe('createRequestBodyStream', () => {
     it('should create read stream for given requestId', (done) => {
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
       async.waterfall([
         async.apply(async.parallel, [
-          (next) => storage.saveRequest(req1.meta.id, req1, next),
-          (next) => storage.saveRequest(req2.meta.id, req2, next),
+          (next) => storage.saveRequest(req1, next),
+          (next) => storage.saveRequest(req2, next),
         ]),
-        (res, next) => streams.toBuffer(storage.createRequestBodyStream(req1.meta.id), next),
+        (res, next) => streams.toBuffer(storage.createRequestBodyStream(req1.requestId), next),
         (buffer, next) => {
-          expect(buffer.toString()).to.eql(req1.meta.body.data);
-          streams.toBuffer(storage.createRequestBodyStream(req2.meta.id), next);
+          expect(buffer.toString()).to.eql(req1.request.meta.body.data);
+          streams.toBuffer(storage.createRequestBodyStream(req2.requestId), next);
         },
         (buffer, next) => {
-          expect(buffer.toString()).to.eql(req2.meta.body.data);
+          expect(buffer.toString()).to.eql(req2.request.meta.body.data);
           next();
         },
       ], done);
@@ -101,21 +100,21 @@ describe('storage', () => {
 
   describe('createResponseBodyStream', () => {
     it('should create read stream for given requestId', (done) => {
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const res1 = chance.http.responseWithBody(req1.meta.id, tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
-      const res2 = chance.http.responseWithBody(req2.meta.id, tmpDir);
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const res1 = chance.http.responseWithBody(req1.requestId, tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
+      const res2 = chance.http.responseWithBody(req2.requestId, tmpDir);
       async.waterfall([
         async.apply(async.waterfall, [
-          (next) => storage.saveRequest(req1.meta.id, req1, next),
-          (next) => storage.saveResponse(req1.meta.id, res1, next),
-          (next) => storage.saveRequest(req2.meta.id, req2, next),
-          (next) => storage.saveResponse(req2.meta.id, res2, next),
+          (next) => storage.saveRequest(req1, next),
+          (next) => storage.saveResponse(req1.requestId, res1, next),
+          (next) => storage.saveRequest(req2, next),
+          (next) => storage.saveResponse(req2.requestId, res2, next),
         ]),
-        (next) => streams.toBuffer(storage.createResponseBodyStream(req1.meta.id), next),
+        (next) => streams.toBuffer(storage.createResponseBodyStream(req1.requestId), next),
         (buffer, next) => {
           expect(buffer.toString()).to.eql(res1.meta.body.data);
-          streams.toBuffer(storage.createResponseBodyStream(req2.meta.id), next);
+          streams.toBuffer(storage.createResponseBodyStream(req2.requestId), next);
         },
         (buffer, next) => {
           expect(buffer.toString()).to.eql(res2.meta.body.data);
@@ -127,16 +126,16 @@ describe('storage', () => {
 
   describe('purge', () => {
     it('should remove all the data and streams', (done) => {
-      const req1 = chance.http.requestWithBody(tmpDir);
-      const res1 = chance.http.responseWithBody(req1.meta.id, tmpDir);
-      const req2 = chance.http.requestWithBody(tmpDir);
-      const res2 = chance.http.responseWithBody(req2.meta.id, tmpDir);
+      const req1 = chance.http.saveRequestParams(tmpDir);
+      const res1 = chance.http.responseWithBody(req1.requestId, tmpDir);
+      const req2 = chance.http.saveRequestParams(tmpDir);
+      const res2 = chance.http.responseWithBody(req2.requestId, tmpDir);
       async.waterfall([
         async.apply(async.waterfall, [
-          (next) => storage.saveRequest(req1.meta.id, req1, next),
-          (next) => storage.saveResponse(req1.meta.id, res1, next),
-          (next) => storage.saveRequest(req2.meta.id, req2, next),
-          (next) => storage.saveResponse(req2.meta.id, res2, next),
+          (next) => storage.saveRequest(req1, next),
+          (next) => storage.saveResponse(req1.requestId, res1, next),
+          (next) => storage.saveRequest(req2, next),
+          (next) => storage.saveResponse(req2.requestId, res2, next),
         ]),
         (next) => storage.purge(next),
         (next) => storage.getRequests(next),
@@ -206,7 +205,7 @@ describe('storage', () => {
       fakeResBody = chance.http.prepareBodyStream(requestId, tmpDir, 'response-');
       const fakeReqBody = chance.http.prepareBodyStream(requestId, tmpDir, 'request-');
       response = chance.http.response(fakeResBody.stream);
-      storage.saveRequest(requestId, chance.http.request(fakeReqBody.stream), done);
+      storage.saveRequest({ requestId, request: chance.http.request(fakeReqBody.stream) }, done);
     });
 
     it('should save response with headers and body', (done) => {
