@@ -33,7 +33,7 @@ describe('requestsController', () => {
   const sandbox = sinon.sandbox.create();
   beforeEach((done) => {
     fs.mkdirSync(streamsDir);
-    app.startApiLayer(storage, (err, srv) => {
+    app.startAppLayer(storage, { withUiLayer: false }, (err, srv) => {
       server = srv;
       done(err);
     });

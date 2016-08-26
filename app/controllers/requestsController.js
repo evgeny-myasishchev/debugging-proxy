@@ -1,6 +1,7 @@
 const express = require('express');
 
-function create(storage) {
+function create(storage, logger) {
+  logger.debug('Creating api/v1/requests controller');
   const router = new express.Router();
 
   router.get('/api/v1/requests', (req, res) => {
