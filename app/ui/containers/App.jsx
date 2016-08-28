@@ -3,28 +3,50 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import React, { Component, PropTypes } from 'react'
 import { fetchRequests } from '../actions'
+import RequestsList from '../components/RequestsList.jsx'
 
 class App extends Component {
   componentWillMount() {
     this.props.fetchRequests();
   }
+  
+  renderLoading() {
+    return (
+      <div className='tag tag-info'>loading requests...</div>
+    )
+  }
+  
+  renderEntries() {
+    const requests = this.props.requests;
+    return (
+      <RequestsList requests={requests} />
+    )
+  }
 
   render() {
+    const renderer = this.props.isFetching ? this.renderLoading : this.renderEntries;
     return (
       <div>
-        <h1>It Works!</h1>
-        <p>This React project just works including local styles.</p>
-        <p>Global bootstrap css import works too as you can see on the following button.</p>
-        <p><a href="" className="btn btn-primary btn-lg">Say Hello!</a></p>
+        <h1>Requests</h1>
+        {renderer.apply(this)}
       </div>
     );
   }
 }
 
 App.propTypes = {
-  fetchRequests: PropTypes.func.isRequired
+  isFetching: PropTypes.bool.isRequired,
+  requests: PropTypes.array.isRequired,
+  fetchRequests: PropTypes.func.isRequired,
 }
 
-export default connect(null, {
+function mapStateToProps(state) {
+  return {
+    isFetching: state.requests.isFetching,
+    requests: state.requests.entries
+  }
+}
+
+export default connect(mapStateToProps, {
   fetchRequests,
 })(App)

@@ -1,6 +1,17 @@
 import { routerReducer as routing } from 'react-router-redux'
 import { combineReducers } from 'redux'
+import * as _ from 'lodash'
 import * as ActionTypes from './actions'
+
+function requests(state = { entries: [], isFetching: false }, action) {
+  if(action.type === 'FETCH_REQUESTS') {
+    return _.merge({isFetching: true}, state);
+  }
+  if(action.type === 'FETCH_SUCCESS') {
+    return _.merge({}, state, {isFetching: false, entries: action.response});
+  }
+  return state;
+}
 
 // Updates error message to notify about the failed fetches.
 function errorMessage(state = null, action) {
@@ -16,6 +27,7 @@ function errorMessage(state = null, action) {
 }
 
 const rootReducer = combineReducers({
+  requests,
   errorMessage,
   routing
 })
