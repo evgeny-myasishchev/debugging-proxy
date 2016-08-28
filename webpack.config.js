@@ -9,7 +9,7 @@ const loaders = require('./webpack.loaders');
 module.exports = validate({
   entry: [
     'webpack-hot-middleware/client?reload=true',
-    './app/ui/app.jsx',
+    './app/ui/index.jsx',
   ],
   output: {
     path: path.join(__dirname, 'public'),
