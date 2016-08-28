@@ -1,3 +1,5 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'font-awesome/css/font-awesome.min.css';
 import { render } from 'react-dom';
 import React from 'react';
 import Hello from './hello.jsx';
@@ -14,4 +16,4 @@ function App() {
   );
 }
 
-render(<App />, document.querySelector('.app'));
+render(<App />, document.querySelector('#app'));

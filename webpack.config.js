@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const validate = require('webpack-validator');
 const webpack = require('webpack');
+const loaders = require('./webpack.loaders');
 
 module.exports = validate({
   entry: [
@@ -15,11 +16,7 @@ module.exports = validate({
     filename: '[name].js',
   },
   module: {
-    loaders: [{
-      test: /\.jsx?$/,
-      exclude: /node_modules/,
-      loader: 'babel-loader',
-    }],
+    loaders,
   },
   plugins: [
     new HtmlWebpackPlugin({
