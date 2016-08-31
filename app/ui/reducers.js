@@ -5,10 +5,10 @@ import * as ActionTypes from './actions'
 
 function requests(state = { entries: [], isFetching: false }, action) {
   if(action.type === 'FETCH_REQUESTS') {
-    return _.merge({isFetching: true}, state);
+    return _.merge({}, state, {isFetching: true});
   }
   if(action.type === 'FETCH_SUCCESS') {
-    return _.merge({}, state, {isFetching: false, entries: action.response});
+    return _.assign({}, state, {isFetching: false, entries: action.response});
   }
   return state;
 }
