@@ -1,13 +1,13 @@
 import { routerReducer as routing } from 'react-router-redux'
 import { combineReducers } from 'redux'
 import * as _ from 'lodash'
-import * as ActionTypes from './actions'
+import * as actions from './actions'
 
 function requests(state = { entries: [], isFetching: false }, action) {
-  if(action.type === 'FETCH_REQUESTS') {
+  if(action.type === actions.FETCH_REQUESTS) {
     return _.merge({}, state, {isFetching: true});
   }
-  if(action.type === 'FETCH_SUCCESS') {
+  if(action.type === actions.FETCH_SUCCESS) {
     return _.assign({}, state, {isFetching: false, entries: action.response});
   }
   return state;
@@ -17,7 +17,7 @@ function requests(state = { entries: [], isFetching: false }, action) {
 function errorMessage(state = null, action) {
   const { type, error } = action
 
-  if (type === ActionTypes.RESET_ERROR_MESSAGE) {
+  if (type === actions.RESET_ERROR_MESSAGE) {
     return null
   } else if (error) {
     return action.error

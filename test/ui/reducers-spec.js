@@ -1,16 +1,19 @@
+import Chance from 'chance';
 import { expect } from 'chai';
 import reducers from '../../app/ui/reducers';
 import * as actions from '../../app/ui/actions';
 
+const chance = new Chance();
+
 describe('reducers', () => {
+  const invoke = (state, action) => reducers(state, action);
+  let initialState;
+
+  beforeEach(() => {
+    initialState = invoke(undefined, {});
+  });
+
   describe('requests', () => {
-    const invoke = (state, action) => reducers(state, action);
-    let initialState;
-
-    beforeEach(() => {
-      initialState = invoke(undefined, {});
-    });
-
     it('should return initial state', () => {
       expect(initialState.requests).to.eql({ entries: [], isFetching: false });
     });
@@ -37,6 +40,38 @@ describe('reducers', () => {
       initialState.requests.isFetching = false;
       initialState.requests.entries = entries;
       expect(state).to.eql(initialState);
+    });
+
+    it('should return state for unknown actions', () => {
+      const action = { type: 'UNSUPPORTED-ACTION' };
+      const dummyState = { prop1: chance.word(), prop2: chance.word() };
+      const state = invoke({ requests: dummyState }, action);
+      expect(state.requests).to.eql(dummyState);
+    });
+  });
+
+  describe('errorMessage', () => {
+    it('should return initial state', () => {
+      expect(initialState.errorMessage).to.eql(null);
+    });
+
+    it('should return error if action has it', () => {
+      const action = { error: chance.sentence() };
+      const state = invoke(initialState, action);
+      expect(state.errorMessage).to.eql(action.error);
+    });
+
+    it('should reset on reset action', () => {
+      initialState.errorMessage = chance.sentence();
+      const state = invoke(initialState, actions.resetErrorMessage());
+      expect(state.errorMessage).to.eql(null);
+    });
+
+    it('should return state for unknown actions', () => {
+      const action = { type: 'UNSUPPORTED-ACTION' };
+      const dummyState = { prop1: chance.word(), prop2: chance.word() };
+      const state = invoke({ errorMessage: dummyState }, action);
+      expect(state.errorMessage).to.eql(dummyState);
     });
   });
 });
