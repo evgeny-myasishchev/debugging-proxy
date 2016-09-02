@@ -2,20 +2,16 @@ const _ = require('lodash');
 const app = require('../../app');
 const async = require('async');
 const chai = require('chai');
-const chance = require('chance')();
-const chanceMixin = require('../support/chanceMixin');
+const chance = require('../support/chance');
 const fs = require('fs');
 const logging = require('../support/logging');
 const path = require('path');
 const request = require('supertest');
 const sinon = require('sinon');
-const sinonChai = require('sinon-chai');
 const Storage = require('../../app/models/Storage');
 const tmpHelper = require('../support/tmpHelper');
 
 const expect = chai.expect;
-chance.mixin(chanceMixin);
-chai.use(sinonChai);
 
 describe('requestsController', () => {
   const tmpDir = path.normalize(path.join(__dirname, '..', '..', 'tmp', 'storage-spec'));

@@ -1,8 +1,7 @@
 const _ = require('lodash');
 const async = require('async');
 const chai = require('chai');
-const chance = require('chance')();
-const chanceMixin = require('../support/chanceMixin');
+const chance = require('../support/chance');
 const fs = require('fs');
 const path = require('path');
 const Storage = require('../../app/models/Storage');
@@ -13,7 +12,6 @@ const tmpHelper = require('../support/tmpHelper');
 const logging = require('../support/logging');
 
 const expect = chai.expect;
-chance.mixin(chanceMixin);
 
 describe('storage', () => {
   logging.hook();

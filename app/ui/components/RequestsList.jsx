@@ -1,6 +1,4 @@
 import { connect } from 'react-redux'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'font-awesome/css/font-awesome.min.css';
 import React, { Component, PropTypes } from 'react'
 import { fetchRequests } from '../actions'
 
@@ -31,7 +29,6 @@ RequestsList.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    isFetching: state.requests.isFetching,
     requests: state.requests.entries
   }
 }

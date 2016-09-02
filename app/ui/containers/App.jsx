@@ -1,18 +1,19 @@
 import { connect } from 'react-redux'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'font-awesome/css/font-awesome.min.css';
+// TODO: Doesn't work in tests so either fix it or add some conditional import
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'font-awesome/css/font-awesome.min.css';
 import React, { Component, PropTypes } from 'react'
 import { fetchRequests } from '../actions'
 import RequestsList from '../components/RequestsList.jsx'
 
-class App extends Component {
+export class App extends Component {
   componentWillMount() {
     this.props.fetchRequests();
   }
   
   renderLoading() {
     return (
-      <div className='tag tag-info'>loading requests...</div>
+      <div className='tag tag-info'>Loading requests...</div>
     )
   }
   

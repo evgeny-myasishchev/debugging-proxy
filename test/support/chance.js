@@ -5,7 +5,44 @@ const path = require('path');
 const url = require('url');
 const uuid = require('uuid');
 
-module.exports = {
+chance.mixin({
+  data: {
+    request: () => {
+      const requestUrl = url.parse(`${chance.url()}?key1=${chance.word()}&key2=${chance.word()}`);
+      return {
+        protocol: chance.http.protocol(),
+        host: requestUrl.host,
+        method: chance.http.method(),
+        path: requestUrl.path,
+        httpVersion: chance.http.httpVersion(),
+        headers: [
+          { key: 'Host', value: requestUrl.host },
+          { key: 'X-Header-1', value: `header-1-${chance.word()}` },
+          { key: 'X-Header-2', value: `header-2-${chance.word()}` },
+          { key: 'X-Header-3', value: `header-3-${chance.word()}` },
+        ],
+        meta: {
+          url: requestUrl,
+        },
+      };
+    },
+    response: () => ({
+      httpVersion: chance.http.httpVersion(),
+      statusCode: chance.integer({ min: 100, max: 599 }),
+      statusMessage: chance.sentence({ words: 3 }),
+      headers: [
+        { key: 'X-Header-1', value: `header-1-${chance.word()}` },
+        { key: 'X-Header-2', value: `header-2-${chance.word()}` },
+        { key: 'X-Header-3', value: `header-3-${chance.word()}` },
+      ],
+    }),
+    savedRequest: () => ({
+      _id: uuid.v4(),
+      date: chance.date(),
+      request: chance.data.request(),
+      response: chance.data.response(),
+    }),
+  },
   http: {
     protocol: () => chance.pick(['https', 'http']),
     method: () => chance.pick(['GET', 'POST', 'PUT', 'DELETE']),
@@ -77,4 +114,6 @@ module.exports = {
       })
     ),
   },
-};
+});
+
+module.exports = chance;
