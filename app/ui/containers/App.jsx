@@ -1,7 +1,6 @@
 import { connect } from 'react-redux'
-// TODO: Doesn't work in tests so either fix it or add some conditional import
-// import 'bootstrap/dist/css/bootstrap.min.css';
-// import 'font-awesome/css/font-awesome.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'font-awesome/css/font-awesome.min.css';
 import React, { Component, PropTypes } from 'react'
 import { fetchRequests } from '../actions'
 import RequestsList from '../components/RequestsList.jsx'
