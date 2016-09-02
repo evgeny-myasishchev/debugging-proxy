@@ -26,7 +26,7 @@ describe('containers App', () => {
     const req1 = chance.data.savedRequest();
     const req2 = chance.data.savedRequest();
     const { enzymeWrapper, props } = setup({ requests: [req1, req2] });
-    const requestsList = enzymeWrapper.find('Connect(RequestsList)');
+    const requestsList = enzymeWrapper.find('RequestsList');
     expect(requestsList.props().requests).to.eql([req1, req2]);
     expect(props.fetchRequests).to.have.callCount(1);
   });

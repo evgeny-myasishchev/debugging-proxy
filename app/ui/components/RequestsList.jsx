@@ -1,10 +1,8 @@
-import { connect } from 'react-redux'
 import React, { Component, PropTypes } from 'react'
-import { fetchRequests } from '../actions'
+import RequestDetails from './RequestDetails.jsx'
 
-class RequestsList extends Component {
+export default class RequestsList extends Component {
   componentWillMount() {
-    //TODO: Load 
   }
 
   render() {
@@ -14,7 +12,7 @@ class RequestsList extends Component {
         <tbody>
           {requests.map(req => 
             <tr key={req._id}>
-              <td>{req.request.method} {req.request.protocol}://{req.request.host}{req.request.path}</td>
+              <td><RequestDetails request={req} /></td>
             </tr>
           )}
         </tbody>
@@ -26,13 +24,3 @@ class RequestsList extends Component {
 RequestsList.propTypes = {
   requests: PropTypes.array.isRequired
 }
-
-function mapStateToProps(state) {
-  return {
-    requests: state.requests.entries
-  }
-}
-
-export default connect(mapStateToProps, {
-  fetchRequests,
-})(RequestsList)
