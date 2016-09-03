@@ -1,13 +1,15 @@
 const _ = require('lodash');
 const async = require('async');
 const Datastore = require('nedb');
+const EventEmitter = require('events');
 const fs = require('fs');
 const logger = require('../lib/logger').get({ module: 'storage' });
 const path = require('path');
 const url = require('url');
 
-class Storage {
+class Storage extends EventEmitter {
   constructor(cfg) {
+    super();
     this.db = new Datastore({
       inMemoryOnly: cfg.inMemoryOnly,
       filename: cfg.filename,
@@ -47,6 +49,7 @@ class Storage {
       headers: _.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })),
     };
     log.debug({ request: data }, 'Saving request');
+    const requestData = { _id: requestId, request: data, date: new Date() };
     async.parallel([ // Has to be in parallel in order to have pipe started quickly
       (next) => {
         const reqFilePath = path.join(this.streamsDir, `${requestId}-req.txt`);
@@ -59,8 +62,12 @@ class Storage {
         });
         request.pipe(output);
       },
-      (next) => this.db.insert({ _id: requestId, request: data, date: new Date() }, _.unary(next)),
-    ], _.unary(cb));
+      (next) => this.db.insert(requestData, _.unary(next)),
+    ], (err) => {
+      if (err) return cb(err);
+      this.emit('request-saved', requestData);
+      return cb();
+    });
   }
 
   saveResponse(requestId, response, cb) {

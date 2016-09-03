@@ -30,6 +30,7 @@ describe('storage', () => {
   });
 
   afterEach((done) => {
+    storage.removeAllListeners();
     db.remove({}, done);
   });
 
@@ -188,6 +189,29 @@ describe('storage', () => {
           const reqFile = path.join(streamsDir, `${requestId}-req.txt`);
           expect(fs.existsSync(reqFile), `Req body has not been saved to ${reqFile}`).to.eql(true);
           expect(fs.readFileSync(reqFile).toString()).to.eql(fakeBody.data);
+          next();
+        },
+      ], done);
+    });
+
+    it('should raise request-saved event', (done) => {
+      const protocol = chance.http.protocol();
+      const host = chance.domain();
+      const requestUrl = url.parse(request.url);
+      async.waterfall([
+        (next) => {
+          storage.on('request-saved', async.apply(next, null));
+          storage.saveRequest({ requestId, request, host, protocol }, _.noop);
+        },
+        (data, next) => {
+          const reqData = data.request;
+          expect(reqData.protocol).to.eql(protocol);
+          expect(reqData.host).to.eql(host);
+          expect(reqData.method).to.eql(request.method);
+          expect(reqData.path).to.eql(requestUrl.path);
+          expect(reqData.httpVersion).to.eql(request.httpVersion);
+          expect(reqData.headers).to.eql(_.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
+          expect(data.date.getTime()).to.be.closeTo(new Date().getTime(), 100);
           next();
         },
       ], done);
