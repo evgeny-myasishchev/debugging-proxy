@@ -49,7 +49,7 @@ class Storage extends EventEmitter {
       headers: _.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })),
     };
     log.debug({ request: data }, 'Saving request');
-    const requestData = { _id: requestId, request: data, date: new Date() };
+    const requestData = { _id: requestId, request: data, startedAt: new Date() };
     async.parallel([ // Has to be in parallel in order to have pipe started quickly
       (next) => {
         const reqFilePath = path.join(this.streamsDir, `${requestId}-req.txt`);
@@ -78,7 +78,8 @@ class Storage extends EventEmitter {
       statusMessage: response.statusMessage,
       headers: _.map(_.chunk(response.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })),
     };
-    log.debug({ response: data }, 'Saving response');
+    const responseData = { completedAt: new Date(), response: data };
+    log.debug(responseData, 'Saving response');
     async.parallel([ // Has to be in parallel in order to have pipe started quickly
       (next) => {
         const resFilePath = path.join(this.streamsDir, `${requestId}-res.txt`);
@@ -91,7 +92,7 @@ class Storage extends EventEmitter {
         });
         return response.pipe(output);
       },
-      (next) => this.db.update({ _id: requestId }, { $set: { response: data } }, (err, numAffected) => {
+      (next) => this.db.update({ _id: requestId }, { $set: responseData }, (err, numAffected) => {
         if (err) return next(err);
         if (numAffected !== 1) {
           log.info(`Unexpected number of affected cocuments: ${numAffected}`);
@@ -99,7 +100,11 @@ class Storage extends EventEmitter {
         }
         return next();
       }),
-    ], _.unary(cb));
+    ], (err) => {
+      if (err) return cb(err);
+      this.emit('response-saved', responseData);
+      return cb();
+    });
   }
 
   purge(cb) {

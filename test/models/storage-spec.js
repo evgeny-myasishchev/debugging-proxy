@@ -176,7 +176,7 @@ describe('storage', () => {
           expect(reqData.path).to.eql(requestUrl.path);
           expect(reqData.httpVersion).to.eql(request.httpVersion);
           expect(reqData.headers).to.eql(_.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
-          expect(data.date.getTime()).to.be.closeTo(new Date().getTime(), 100);
+          expect(data.startedAt.getTime()).to.be.closeTo(new Date().getTime(), 100);
           next();
         },
       ], done);
@@ -211,7 +211,7 @@ describe('storage', () => {
           expect(reqData.path).to.eql(requestUrl.path);
           expect(reqData.httpVersion).to.eql(request.httpVersion);
           expect(reqData.headers).to.eql(_.map(_.chunk(request.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
-          expect(data.date.getTime()).to.be.closeTo(new Date().getTime(), 100);
+          expect(data.startedAt.getTime()).to.be.closeTo(new Date().getTime(), 100);
           next();
         },
       ], done);
@@ -240,6 +240,7 @@ describe('storage', () => {
           expect(respData.statusMessage).to.eql(response.statusMessage);
           expect(respData.httpVersion).to.eql(response.httpVersion);
           expect(respData.headers).to.eql(_.map(_.chunk(response.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
+          expect(data.completedAt.getTime()).to.be.closeTo(new Date().getTime(), 100);
           next();
         },
       ], done);
@@ -274,6 +275,24 @@ describe('storage', () => {
           const resFile = path.join(streamsDir, `${requestId}-res.txt`);
           expect(fs.existsSync(resFile), `Res body has not been saved to ${resFile}`).to.eql(true);
           expect(fs.readFileSync(resFile).toString()).to.eql(fakeResBody.data);
+          next();
+        },
+      ], done);
+    });
+
+    it('should raise response-saved event', (done) => {
+      async.waterfall([
+        (next) => {
+          storage.on('response-saved', async.apply(next, null));
+          storage.saveResponse(requestId, response, _.noop);
+        },
+        (data, next) => {
+          const respData = data.response;
+          expect(respData.statusCode).to.eql(response.statusCode);
+          expect(respData.statusMessage).to.eql(response.statusMessage);
+          expect(respData.httpVersion).to.eql(response.httpVersion);
+          expect(respData.headers).to.eql(_.map(_.chunk(response.rawHeaders, 2), (pair) => ({ key: pair[0], value: pair[1] })));
+          expect(data.completedAt.getTime()).to.be.closeTo(new Date().getTime(), 100);
           next();
         },
       ], done);

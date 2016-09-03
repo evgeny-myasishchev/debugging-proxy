@@ -38,7 +38,8 @@ chance.mixin({
     }),
     savedRequest: () => ({
       _id: uuid.v4(),
-      date: chance.date(),
+      startedAt: chance.date(),
+      completedAt: chance.date(),
       request: chance.data.request(),
       response: chance.data.response(),
     }),
