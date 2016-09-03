@@ -9,6 +9,7 @@ const logger = require('./app/lib/logger').get();
 const proxy = require('./app/proxy');
 const requestsController = require('./app/controllers/requestsController');
 const Storage = require('./app/models/Storage');
+const socketServer = require('./app/socketServer');
 
 function startProxy(storage, cb) {
   const opts = {
@@ -52,11 +53,19 @@ function startAppLayer(storage, options, cb) {
   return cb(null, server);
 }
 
+function startSocketServer(httpServer, storage) {
+  logger.info('Starting socket server');
+  socketServer.start(httpServer, storage);
+}
+
 function start(cb) {
   const storage = new Storage(config.get('storage'));
   async.series([
     async.apply(startProxy, storage),
-    async.apply(startAppLayer, storage, {}),
+    (next) => startAppLayer(storage, {}, (err, httpServer) => {
+      startSocketServer(httpServer, storage);
+      next();
+    }),
   ], cb);
 }
 
