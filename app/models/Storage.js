@@ -65,6 +65,7 @@ class Storage extends EventEmitter {
       (next) => this.db.insert(requestData, _.unary(next)),
     ], (err) => {
       if (err) return cb(err);
+      log.debug('Emitting request-saved');
       this.emit('request-saved', requestData);
       return cb();
     });
@@ -102,6 +103,7 @@ class Storage extends EventEmitter {
       }),
     ], (err) => {
       if (err) return cb(err);
+      log.debug('Emitting response-saved');
       this.emit('response-saved', responseData);
       return cb();
     });
