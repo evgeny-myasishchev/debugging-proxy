@@ -7,14 +7,12 @@ function callApi(endpoint) {
   const fullUrl = (endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint;
 
   return fetch(fullUrl)
-    .then(response =>
-      response.json().then(json => ({ json, response }))
-    ).then(({ json, response }) => {
+    .then(response => {
       if (!response.ok) {
-        return Promise.reject(json);
+        return Promise.reject(response);
       }
-      return json;
-    })
+      return response.json();
+    });
 }
 
 // Action key that carries API call info interpreted by this Redux middleware.
@@ -50,13 +48,21 @@ export default () => next => action => {
   next(actionWith({ type: requestType }));
 
   return callApi(endpoint).then(
-    response => next(actionWith({
-      response,
-      type: successType
-    })),
-    error => next(actionWith({
-      type: failureType,
-      error: error.message || 'Something bad happened'
-    }))
+    response => {
+      next(actionWith({
+        response,
+        type: successType
+      }))
+    },
+    response => {
+      const data = {
+        statusCode : response.status,
+        statusMessage : response.statusText
+      };
+      next(actionWith({
+        type: failureType,
+        error: data
+      }))
+    }
   )
 }
