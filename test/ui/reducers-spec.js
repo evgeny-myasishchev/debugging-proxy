@@ -80,9 +80,9 @@ describe('reducers', () => {
       it('should insert new request on top of requests', () => {
         const newRequest = reqEntry();
         initialState.requests.entries = [reqEntry(), reqEntry()];
-        invoke(initialState, actions.addNewRequest(newRequest));
-        expect(initialState.requests.entries.length).to.eql(3);
-        expect(initialState.requests.entries[0]).to.eql(newRequest);
+        const state = invoke(initialState, actions.addNewRequest(newRequest));
+        expect(state.requests.entries.length).to.eql(3);
+        expect(state.requests.entries[0]).to.eql(newRequest);
       });
     });
 
@@ -104,10 +104,10 @@ describe('reducers', () => {
         };
       });
       it('should assign response data for corresponding reqeust', () => {
-        invoke(initialState, actions.addNewResponse(res));
-        expect(initialState.requests.entries.length).to.eql(3);
-        expect(initialState.requests.entries[1].response).to.eql(res.response);
-        expect(initialState.requests.entries[1].completedAt).to.eql(res.completedAt);
+        const state = invoke(initialState, actions.addNewResponse(res));
+        expect(state.requests.entries.length).to.eql(3);
+        expect(state.requests.entries[1].response).to.eql(res.response);
+        expect(state.requests.entries[1].completedAt).to.eql(res.completedAt);
       });
     });
   });

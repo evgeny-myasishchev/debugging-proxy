@@ -11,7 +11,7 @@ const apiRoot = 'http://localhost:3000'; //TODO: Make configurable
 const store = configureStore(apiRoot);
 const history = syncHistoryWithStore(browserHistory, store);
 
-socketClient(store);
+socketClient(apiRoot, store);
 
 render(
   <Root store={store} history={history} />,

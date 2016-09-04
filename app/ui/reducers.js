@@ -12,15 +12,16 @@ function requests(state = { entries: [], isFetching: false }, action) {
     return _.assign({}, state, {isFetching: false, entries: ordered});
   }
   if(action.type === actions.ADD_NEW_REQUEST) {
-    state.entries.unshift(action.request);
-    return state;
+    const entries = _.concat(action.request, state.entries);
+    return _.assign({}, state, { entries : entries });
   }
   if(action.type === actions.ADD_NEW_RESPONSE) {
     const reqId = _.get(action, 'response._id');
-    const request = _.find(state.entries, { _id : reqId })
+    const entries = _.cloneDeep(state.entries);
+    const request = _.find(entries, { _id : reqId })
     request.response = action.response.response;
     request.completedAt = action.response.completedAt;
-    return state;
+    return _.assign({}, state, { entries : entries });
   }
   return state;
 }
