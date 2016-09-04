@@ -7,8 +7,9 @@ import Root from './containers/Root.jsx'
 import configureStore from './store/configureStore'
 import socketClient from './socketClient';
 
-const store = configureStore()
-const history = syncHistoryWithStore(browserHistory, store)
+const apiRoot = 'http://localhost:3000'; //TODO: Make configurable
+const store = configureStore(apiRoot);
+const history = syncHistoryWithStore(browserHistory, store);
 
 socketClient(store);
 

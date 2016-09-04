@@ -1,26 +1,11 @@
 import 'isomorphic-fetch'
 
-// TODO: Make this configurable
-const API_ROOT = 'http://localhost:3000'
-
-function callApi(endpoint) {
-  const fullUrl = (endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint;
-
-  return fetch(fullUrl)
-    .then(response => {
-      if (!response.ok) {
-        return Promise.reject(response);
-      }
-      return response.json();
-    });
-}
-
 // Action key that carries API call info interpreted by this Redux middleware.
 export const CALL_API = Symbol('Call API');
 
 // A Redux middleware that interprets actions with CALL_API info specified.
 // Performs the call and promises when such actions are dispatched.
-export default () => next => action => {
+export default (apiRoot) => () => next => action => {
   const callAPI = action[CALL_API]
   if (typeof callAPI === 'undefined') {
     return next(action);
@@ -47,14 +32,21 @@ export default () => next => action => {
   const [ requestType, successType, failureType ] = types;
   next(actionWith({ type: requestType }));
 
-  return callApi(endpoint).then(
-    response => {
+  const fullUrl = (endpoint.indexOf(apiRoot) === -1) ? apiRoot + endpoint : endpoint;
+  return fetch(fullUrl)
+    .then(response => {
+      if (!response.ok) {
+        return Promise.reject(response);
+      }
+      return response.json();
+    })
+    .then(response => {
       next(actionWith({
         response,
         type: successType
       }))
-    },
-    response => {
+    })
+    .catch(response => {
       const data = {
         statusCode : response.status,
         statusMessage : response.statusText
@@ -63,6 +55,5 @@ export default () => next => action => {
         type: failureType,
         error: data
       }))
-    }
-  )
+    })
 }

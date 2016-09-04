@@ -6,7 +6,8 @@ import api, { CALL_API } from '../../../app/ui/middleware/api';
 import chance from '../../support/chance';
 
 describe('ui middleware api', () => {
-  const fn = api();
+  const apiRoot = `http://api.${chance.word()}:${chance.integer({ min: 3000, max: 4000 })}`;
+  const fn = api(apiRoot)();
   let next;
 
   const buildAction = (data) => {
@@ -74,7 +75,7 @@ describe('ui middleware api', () => {
   it('should fetch the data and dispatch success action with response', (done) => {
     const action = buildAction(actionData());
     const data = { fake: chance.word() };
-    fetchMock.mock(`http://localhost:3000${action[CALL_API].endpoint}`, { status: 200, body: data });
+    fetchMock.mock(`${apiRoot}${action[CALL_API].endpoint}`, { status: 200, body: data });
     fn(next)(action)
       .then(() => {
         expect(next).to.have.been.calledWith(_.merge({
@@ -88,7 +89,7 @@ describe('ui middleware api', () => {
 
   it('should fetch the data and dispatch failure action on http error', (done) => {
     const action = buildAction(actionData());
-    fetchMock.mock(`http://localhost:3000${action[CALL_API].endpoint}`, { status: 500 });
+    fetchMock.mock(`${apiRoot}${action[CALL_API].endpoint}`, { status: 500 });
     fn(next)(action)
       .then(() => {
         expect(next).to.have.been.calledWith(_.merge({
