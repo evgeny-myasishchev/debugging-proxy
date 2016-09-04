@@ -205,6 +205,7 @@ describe('storage', () => {
         },
         (data, next) => {
           const reqData = data.request;
+          expect(_.get(data, '_id')).to.eql(requestId);
           expect(reqData.protocol).to.eql(protocol);
           expect(reqData.host).to.eql(host);
           expect(reqData.method).to.eql(request.method);
@@ -288,6 +289,7 @@ describe('storage', () => {
         },
         (data, next) => {
           const respData = data.response;
+          expect(_.get(data, '_id')).to.eql(requestId);
           expect(respData.statusCode).to.eql(response.statusCode);
           expect(respData.statusMessage).to.eql(response.statusMessage);
           expect(respData.httpVersion).to.eql(response.httpVersion);

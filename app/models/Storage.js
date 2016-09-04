@@ -104,7 +104,7 @@ class Storage extends EventEmitter {
     ], (err) => {
       if (err) return cb(err);
       log.debug('Emitting response-saved');
-      this.emit('response-saved', responseData);
+      this.emit('response-saved', _.merge({ _id: requestId }, responseData));
       return cb();
     });
   }
