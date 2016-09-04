@@ -10,6 +10,17 @@ function requests(state = { entries: [], isFetching: false }, action) {
   if(action.type === actions.FETCH_SUCCESS) {
     return _.assign({}, state, {isFetching: false, entries: action.response});
   }
+  if(action.type === actions.ADD_NEW_REQUEST) {
+    state.entries.unshift(action.request);
+    return state;
+  }
+  if(action.type === actions.ADD_NEW_RESPONSE) {
+    const reqId = _.get(action, 'response._id');
+    const request = _.find(state.entries, { _id : reqId })
+    request.response = action.response.response;
+    request.completedAt = action.response.completedAt;
+    return state;
+  }
   return state;
 }
 

@@ -42,11 +42,48 @@ describe('reducers', () => {
       expect(state).to.eql(initialState);
     });
 
+    it('should sort request by startedAt date');
+
     it('should return state for unknown actions', () => {
       const action = { type: 'UNSUPPORTED-ACTION' };
       const dummyState = { prop1: chance.word(), prop2: chance.word() };
       const state = invoke({ requests: dummyState }, action);
       expect(state.requests).to.eql(dummyState);
+    });
+
+    describe('ADD_NEW_REQUEST', () => {
+      it('should insert new request on top of requests', () => {
+        const newRequest = { newReq: chance.word() };
+        initialState.requests.entries = [{ req1: true }, { req2: true }];
+        invoke(initialState, actions.addNewRequest(newRequest));
+        expect(initialState.requests.entries.length).to.eql(3);
+        expect(initialState.requests.entries[0]).to.eql(newRequest);
+      });
+    });
+
+    describe('ADD_NEW_RESPONSE', () => {
+      let req;
+      let res;
+      beforeEach(() => {
+        const reqId = `req-id-${chance.word()}`;
+        req = { _id: reqId };
+        initialState.requests.entries = [
+          { _id: `dummy-req-id-${chance.word()}` },
+          req,
+          { _id: `dummy-req-id-${chance.word()}` },
+        ];
+        res = {
+          _id: reqId,
+          completedAt: chance.date(),
+          response: { dummy: `res-${chance.word()}` },
+        };
+      });
+      it('should assign response data for corresponding reqeust', () => {
+        invoke(initialState, actions.addNewResponse(res));
+        expect(initialState.requests.entries.length).to.eql(3);
+        expect(initialState.requests.entries[1].response).to.eql(res.response);
+        expect(initialState.requests.entries[1].completedAt).to.eql(res.completedAt);
+      });
     });
   });
 
