@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react'
 import { Provider } from 'react-redux'
 import { Router } from 'react-router'
 import routes from '../routes.jsx'
-import DevTools from './DevTools.jsx'
+// import DevTools from './DevTools.jsx'
 
 export default function Root(props) {
   const { store, history } = props
@@ -10,7 +10,7 @@ export default function Root(props) {
     <Provider store={store}>
       <div>
         <Router history={history} routes={routes} />
-        <DevTools />
+        { /*<DevTools /> */}
       </div>
     </Provider>
   )
