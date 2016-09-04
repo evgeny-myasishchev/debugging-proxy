@@ -8,7 +8,8 @@ function requests(state = { entries: [], isFetching: false }, action) {
     return _.merge({}, state, {isFetching: true});
   }
   if(action.type === actions.FETCH_SUCCESS) {
-    return _.assign({}, state, {isFetching: false, entries: action.response});
+    const ordered = _.orderBy(action.response, 'startedAt', 'desc');
+    return _.assign({}, state, {isFetching: false, entries: ordered});
   }
   if(action.type === actions.ADD_NEW_REQUEST) {
     state.entries.unshift(action.request);

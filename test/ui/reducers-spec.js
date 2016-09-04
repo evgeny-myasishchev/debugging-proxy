@@ -1,5 +1,6 @@
-import Chance from 'chance';
 import { expect } from 'chai';
+import * as _ from 'lodash';
+import Chance from 'chance';
 import reducers from '../../app/ui/reducers';
 import * as actions from '../../app/ui/actions';
 
@@ -14,13 +15,28 @@ describe('reducers', () => {
   });
 
   describe('requests', () => {
+    const reqEntry = () => {
+      const random = chance.word();
+      return {
+        _id: `req-id-${random}`,
+        startedAt: chance.date(),
+        completedAt: chance.date(),
+        request: {
+          dummyReq: `${random}`,
+        },
+        response: {
+          dummyRes: `${random}`,
+        },
+      };
+    };
+
     it('should return initial state', () => {
       expect(initialState.requests).to.eql({ entries: [], isFetching: false });
     });
 
     it('should handle fetch requests', () => {
       const action = { type: actions.FETCH_REQUESTS };
-      initialState.requests.entries = [{ entry1: true }, { entry2: true }];
+      initialState.requests.entries = [reqEntry(), reqEntry()];
       const state = invoke(initialState, action);
       expect(state.requests.isFetching).to.eql(true);
       expect(state).not.to.eql(initialState);
@@ -32,7 +48,7 @@ describe('reducers', () => {
       const entries = [{ entry1: true }, { entry2: true }];
       const action = { type: actions.FETCH_SUCCESS, response: entries };
       initialState.requests.isFetching = true;
-      initialState.requests.entries = [{ dummy1: true }, { dummy2: true }];
+      initialState.requests.entries = [reqEntry(), reqEntry()];
       const state = invoke(initialState, action);
       expect(state.requests.isFetching).to.eql(false);
       expect(state.requests.entries).to.eql(entries);
@@ -42,7 +58,16 @@ describe('reducers', () => {
       expect(state).to.eql(initialState);
     });
 
-    it('should sort request by startedAt date');
+    it('should sort request by startedAt date', () => {
+      const req1 = reqEntry();
+      const req2 = reqEntry();
+      const req3 = reqEntry();
+      const entries = [req1, req2, req3];
+      const action = { type: actions.FETCH_SUCCESS, response: entries };
+      const state = invoke(initialState, action);
+      const ordered = _.orderBy(entries, 'startedAt', 'desc');
+      expect(state.requests.entries).to.eql(ordered);
+    });
 
     it('should return state for unknown actions', () => {
       const action = { type: 'UNSUPPORTED-ACTION' };
@@ -53,8 +78,8 @@ describe('reducers', () => {
 
     describe('ADD_NEW_REQUEST', () => {
       it('should insert new request on top of requests', () => {
-        const newRequest = { newReq: chance.word() };
-        initialState.requests.entries = [{ req1: true }, { req2: true }];
+        const newRequest = reqEntry();
+        initialState.requests.entries = [reqEntry(), reqEntry()];
         invoke(initialState, actions.addNewRequest(newRequest));
         expect(initialState.requests.entries.length).to.eql(3);
         expect(initialState.requests.entries[0]).to.eql(newRequest);
@@ -68,9 +93,9 @@ describe('reducers', () => {
         const reqId = `req-id-${chance.word()}`;
         req = { _id: reqId };
         initialState.requests.entries = [
-          { _id: `dummy-req-id-${chance.word()}` },
+          reqEntry(),
           req,
-          { _id: `dummy-req-id-${chance.word()}` },
+          reqEntry(),
         ];
         res = {
           _id: reqId,
