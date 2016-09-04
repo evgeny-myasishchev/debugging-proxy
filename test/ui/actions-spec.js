@@ -1,8 +1,9 @@
+import { expect } from 'chai';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import { expect } from 'chai';
-import * as actions from '../../app/ui/actions';
 import { CALL_API } from '../../app/ui/middleware/api';
+import * as actions from '../../app/ui/actions';
+import chance from '../support/chance';
 
 function handleApiAction() {
   return (next) => (action) => {
@@ -35,6 +36,24 @@ describe('ui', () => {
       it('should create reset error message action', () => {
         const action = actions.resetErrorMessage();
         expect(action.type).to.eql(actions.RESET_ERROR_MESSAGE);
+      });
+    });
+
+    describe('addNewRequest', () => {
+      it('should create add new request action', () => {
+        const request = { dummy: chance.word() };
+        expect(actions.addNewRequest(request)).to.eql({
+          type: actions.ADD_NEW_REQUEST, request,
+        });
+      });
+    });
+
+    describe('addNewResponse', () => {
+      it('should create add new request action', () => {
+        const response = { dummy: chance.word() };
+        expect(actions.addNewResponse(response)).to.eql({
+          type: actions.ADD_NEW_RESPONSE, response,
+        });
       });
     });
   });

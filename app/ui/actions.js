@@ -23,3 +23,15 @@ export function resetErrorMessage() {
     type: RESET_ERROR_MESSAGE
   }
 }
+
+export const ADD_NEW_REQUEST = 'ADD_NEW_REQUEST';
+
+export function addNewRequest(request) {
+  return { type : ADD_NEW_REQUEST, request };
+}
+
+export const ADD_NEW_RESPONSE = 'ADD_NEW_RESPONSE';
+
+export function addNewResponse(response) {
+  return { type : ADD_NEW_RESPONSE, response };
+}
