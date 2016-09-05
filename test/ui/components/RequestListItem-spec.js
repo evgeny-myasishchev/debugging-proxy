@@ -13,6 +13,7 @@ describe('components RequestListItem', () => {
       actions: {
         selectRequest: sinon.spy(),
       },
+      isSelected: false,
     }, p);
 
     const enzymeWrapper = shallow(<RequestListItem {...props} />);
@@ -26,6 +27,10 @@ describe('components RequestListItem', () => {
   it('should render RequestListItem for each request', () => {
     const { enzymeWrapper, props } = setup();
     const request = props.request.request;
+
+    const tr = enzymeWrapper.find('tr');
+    expect(tr.props().className).to.eql(null);
+
     const span = enzymeWrapper.find('span.tag.tag-default');
     expect(span.text()).to.eql(request.method);
 
@@ -38,5 +43,11 @@ describe('components RequestListItem', () => {
     const button = enzymeWrapper.find('button');
     button.props().onClick();
     expect(props.actions.selectRequest).to.have.been.calledWith(props.request);
+  });
+
+  it('should add special class for selected item', () => {
+    const { enzymeWrapper } = setup({ isSelected: true });
+    const tr = enzymeWrapper.find('tr');
+    expect(tr.props().className).to.eql('table-active');
   });
 });

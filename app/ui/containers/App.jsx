@@ -20,9 +20,9 @@ export class App extends Component {
   }
   
   renderEntries() {
-    const { entries } = this.props.requests;
+    const { entries, selectedRequest } = this.props.requests;
     return (
-      <RequestsList requests={entries} actions={this.props.actions} />
+      <RequestsList selectedRequest={selectedRequest} requests={entries} actions={this.props.actions} />
     )
   }
 

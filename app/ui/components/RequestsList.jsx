@@ -6,15 +6,13 @@ export default class RequestsList extends Component {
   }
 
   render() {
-    const { requests, actions } = this.props;
-    const tableStyle = {
-      
-    }
+    const { requests, selectedRequest, actions } = this.props;
+    const isSelected = (req) => !!(selectedRequest && req._id === selectedRequest._id);
     return (
-      <table className='table table-sm table-hover' style={tableStyle}>
+      <table className='table table-sm table-hover'>
         <tbody>
           {requests.map(req => 
-            <RequestListItem key={req._id} request={req} actions={actions} />
+            <RequestListItem key={req._id} request={req} actions={actions} isSelected={isSelected(req)} />
           )}
         </tbody>
       </table>
@@ -24,5 +22,6 @@ export default class RequestsList extends Component {
 
 RequestsList.propTypes = {
   requests: PropTypes.array.isRequired,
+  selectedRequest: PropTypes.object,
   actions: PropTypes.object.isRequired,
 }
