@@ -6,11 +6,12 @@ export default class RequestListItem extends Component {
 
   render() {
     const req = this.props.request;
+    const { selectRequest } = this.props.actions;
     return (
       <tr>
         <td><span className='tag tag-default'>{req.request.method}</span> </td>
         <td>
-          <button className="btn btn-link">
+          <button className="btn btn-link" onClick={() => selectRequest(req)}>
             {req.request.protocol}://{req.request.host}{req.request.path}
           </button>
         </td>
@@ -20,5 +21,6 @@ export default class RequestListItem extends Component {
 }
 
 RequestListItem.propTypes = {
-  request: PropTypes.object.isRequired
+  request: PropTypes.object.isRequired,
+  actions: PropTypes.object.isRequired,
 }
