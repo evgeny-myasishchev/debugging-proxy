@@ -1,17 +1,15 @@
-import React, { Component, PropTypes } from 'react'
+import React, {Component, PropTypes} from 'react'
 
 export default class RequestDetails extends Component {
-  componentWillMount() {
-  }
+  componentWillMount() {}
 
   render() {
-    const req = this.props.request;
     return (
-      <div>{req.request.method} {req.request.protocol}://{req.request.host}{req.request.path}</div>
+      <div className='alert alert-info'>TODO: Request details will be here</div>
     )
   }
 }
 
 RequestDetails.propTypes = {
-  request: PropTypes.object.isRequired
+  request: PropTypes.object
 }

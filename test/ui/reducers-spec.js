@@ -31,7 +31,11 @@ describe('reducers', () => {
     };
 
     it('should return initial state', () => {
-      expect(initialState.requests).to.eql({ entries: [], isFetching: false });
+      expect(initialState.requests).to.eql({
+        entries: [],
+        isFetching: false,
+        selectedRequest: null,
+      });
     });
 
     it('should handle fetch requests', () => {

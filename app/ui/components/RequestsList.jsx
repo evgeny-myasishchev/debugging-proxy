@@ -1,19 +1,20 @@
 import React, { Component, PropTypes } from 'react'
-import RequestDetails from './RequestDetails.jsx'
+import RequestListItem from './RequestListItem.jsx'
 
 export default class RequestsList extends Component {
   componentWillMount() {
   }
 
   render() {
-    const requests = this.props.requests;
+    const { requests, actions } = this.props;
+    const tableStyle = {
+      
+    }
     return (
-      <table>
+      <table className='table table-sm table-hover' style={tableStyle}>
         <tbody>
           {requests.map(req => 
-            <tr key={req._id}>
-              <td><RequestDetails request={req} /></td>
-            </tr>
+            <RequestListItem key={req._id} request={req} actions={actions} />
           )}
         </tbody>
       </table>
@@ -22,5 +23,6 @@ export default class RequestsList extends Component {
 }
 
 RequestsList.propTypes = {
-  requests: PropTypes.array.isRequired
+  requests: PropTypes.array.isRequired,
+  actions: PropTypes.object.isRequired,
 }

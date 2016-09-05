@@ -3,7 +3,7 @@ import { combineReducers } from 'redux'
 import * as _ from 'lodash'
 import * as actions from './actions'
 
-function requests(state = { entries: [], isFetching: false }, action) {
+function requests(state = { entries: [], isFetching: false, selectedRequest: null }, action) {
   if(action.type === actions.FETCH_REQUESTS) {
     return _.merge({}, state, {isFetching: true});
   }

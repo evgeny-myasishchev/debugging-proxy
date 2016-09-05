@@ -1,13 +1,16 @@
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
+import React, { Component, PropTypes } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
-import React, { Component, PropTypes } from 'react'
-import { fetchRequests } from '../actions'
+import * as actions from '../actions'
+import RequestDetails from '../components/RequestDetails.jsx'
 import RequestsList from '../components/RequestsList.jsx'
 
 export class App extends Component {
   componentWillMount() {
-    this.props.fetchRequests();
+    const { fetchRequests } = this.props.actions;
+    fetchRequests();
   }
   
   renderLoading() {
@@ -17,36 +20,47 @@ export class App extends Component {
   }
   
   renderEntries() {
-    const requests = this.props.requests;
+    const { entries } = this.props.requests;
     return (
-      <RequestsList requests={requests} />
+      <RequestsList requests={entries} actions={this.props.actions} />
     )
   }
 
   render() {
-    const renderer = this.props.isFetching ? this.renderLoading : this.renderEntries;
+    const { isFetching, selectedRequest } = this.props.requests;
+    const renderer = isFetching ? this.renderLoading : this.renderEntries;
     return (
-      <div>
+      <div className="container-fluid">
         <h1>Requests</h1>
-        {renderer.apply(this)}
+        
+        <div className='row'>
+          <div className='col-sm-4'>
+            {renderer.apply(this)}
+          </div>
+          <div className='col-sm-8'>
+            <RequestDetails request={selectedRequest} />
+          </div>
+        </div>
       </div>
     );
   }
 }
 
 App.propTypes = {
-  isFetching: PropTypes.bool.isRequired,
-  requests: PropTypes.array.isRequired,
-  fetchRequests: PropTypes.func.isRequired,
+  requests: PropTypes.object.isRequired,
+  actions: PropTypes.object.isRequired
 }
 
 function mapStateToProps(state) {
   return {
-    isFetching: state.requests.isFetching,
-    requests: state.requests.entries
+    requests: state.requests
   }
 }
 
-export default connect(mapStateToProps, {
-  fetchRequests,
-})(App)
+function mapDispatchToProps(dispatch) {
+  return {
+    actions : bindActionCreators(actions, dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
