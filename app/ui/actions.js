@@ -35,3 +35,9 @@ export const ADD_NEW_RESPONSE = 'ADD_NEW_RESPONSE';
 export function addNewResponse(response) {
   return { type : ADD_NEW_RESPONSE, response };
 }
+
+export const SELECT_REQUEST = 'SELECT_REQUEST';
+
+export function selectRequest(request) {
+  return { type : SELECT_REQUEST, request };
+}

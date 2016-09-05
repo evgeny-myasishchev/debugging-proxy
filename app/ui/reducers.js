@@ -23,6 +23,9 @@ function requests(state = { entries: [], isFetching: false }, action) {
     request.completedAt = action.response.completedAt;
     return _.assign({}, state, { entries : entries });
   }
+  if (action.type === actions.SELECT_REQUEST) {
+    return _.assign({}, state, { selectedRequest : action.request });
+  }
   return state;
 }
 

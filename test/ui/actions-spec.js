@@ -56,5 +56,14 @@ describe('ui', () => {
         });
       });
     });
+
+    describe('selectRequest', () => {
+      it('should create select request action', () => {
+        const request = { dummy: chance.word() };
+        expect(actions.selectRequest(request)).to.eql({
+          type: actions.SELECT_REQUEST, request,
+        });
+      });
+    });
   });
 });

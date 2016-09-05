@@ -110,6 +110,14 @@ describe('reducers', () => {
         expect(state.requests.entries[1].completedAt).to.eql(res.completedAt);
       });
     });
+
+    describe('selectRequest', () => {
+      it('should return new state with selected request', () => {
+        const req = reqEntry();
+        const state = invoke(initialState, actions.selectRequest(req));
+        expect(state.requests.selectedRequest).to.eql(req);
+      });
+    });
   });
 
   describe('errorMessage', () => {
