@@ -11,4 +11,7 @@ module.exports = {
     filename: false,
     inMemoryOnly: true,
   },
+  ui: {
+    devToolsEnabled: false,
+  },
 };

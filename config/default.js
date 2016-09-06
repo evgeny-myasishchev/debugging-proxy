@@ -17,4 +17,7 @@ module.exports = {
     streamsDir: 'var/streams',
     inMemoryOnly: false,
   },
+  ui: {
+    devToolsEnabled: true,
+  },
 };

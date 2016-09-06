@@ -6,14 +6,19 @@ import api from '../middleware/api'
 import rootReducer from '../reducers'
 
 export default function configureStore(apiRoot, preloadedState) {
+  const devToolsEnhancers = DEVTOOLS_ENABLED ?
+   [
+     devTools({
+       realtime : true,
+       hostname : 'localhost',
+       port : 8000
+     }),
+     persistState(getDebugSessionKey)
+   ] : [];
+  
   const enhancer = compose(
     applyMiddleware(thunk, api(apiRoot)), 
-    devTools({
-      realtime : process.env.NODE_ENV !== 'production',
-      hostname : 'localhost',
-      port : 8000
-    }),
-    persistState(getDebugSessionKey)
+    ...devToolsEnhancers
   );
   const store = createStore(rootReducer, preloadedState, enhancer);
 
@@ -26,7 +31,7 @@ export default function configureStore(apiRoot, preloadedState) {
     })
   }
 
-  devTools.updateStore(store);
+  if(DEVTOOLS_ENABLED) devTools.updateStore(store);
 
   return store
 }

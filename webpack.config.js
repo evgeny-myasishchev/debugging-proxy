@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
+const config = require('config');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const validate = require('webpack-validator');
@@ -19,6 +20,9 @@ module.exports = validate({
     loaders,
   },
   plugins: [
+    new webpack.DefinePlugin({
+      DEVTOOLS_ENABLED: config.get('ui.devToolsEnabled'),
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'app', 'ui', 'index.ejs'),
     }),
