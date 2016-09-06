@@ -27,6 +27,16 @@ describe('containers App', () => {
     };
   }
 
+  it('should fetch requests', () => {
+    const { props } = setup({ entries: [] });
+    expect(props.actions.fetchRequests).to.have.callCount(1);
+  });
+
+  it('should not fetch requests if there are entries available', () => {
+    const { props } = setup({ entries: [chance.data.savedRequest(), chance.data.savedRequest()] });
+    expect(props.actions.fetchRequests).to.have.callCount(0);
+  });
+
   it('should render RequestsList if not fetching', () => {
     const req1 = chance.data.savedRequest();
     const req2 = chance.data.savedRequest();
@@ -35,7 +45,6 @@ describe('containers App', () => {
     expect(requestsList.props().requests).to.eql([req1, req2]);
     expect(requestsList.props().actions).to.eql(props.actions);
     expect(requestsList.props().selectedRequest).to.eql(req2);
-    expect(props.actions.fetchRequests).to.have.callCount(1);
   });
 
   it('should render loading if fetching', () => {

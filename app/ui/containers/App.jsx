@@ -9,8 +9,14 @@ import RequestsList from '../components/RequestsList.jsx'
 
 export class App extends Component {
   componentWillMount() {
-    const { fetchRequests } = this.props.actions;
-    fetchRequests();
+    const { 
+      requests : { entries : entries },
+      actions : { fetchRequests: fetchRequests} 
+    } = this.props;
+    
+    //Fetching only if there are no entries
+    //Helps to prevent fething if we have persisted state (with persistState)
+    if(!entries.length) fetchRequests();
   }
   
   renderLoading() {
