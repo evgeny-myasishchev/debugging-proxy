@@ -46,11 +46,10 @@
     "react-router-redux": "^4.0.5",
     "redux": "^3.5.2",
     "redux-devtools": "^3.3.1",
-    "redux-devtools-dock-monitor": "^1.1.1",
-    "redux-devtools-log-monitor": "^1.0.11",
-    "redux-logger": "^2.6.1",
     "redux-mock-store": "^1.1.4",
     "redux-thunk": "^2.1.0",
+    "remote-redux-devtools": "^0.4.7",
+    "remotedev-server": "^0.1.8",
     "request": "~2.74.0",
     "rimraf": "^2.5.4",
     "sinon": "~1.17.5",
@@ -68,7 +67,8 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "mocha --recursive",
-    "start": "node server.js"
+    "start": "node server.js",
+    "remotedev": "remotedev --hostname=localhost --port=8000"
   },
   "repository": {
     "type": "git",
