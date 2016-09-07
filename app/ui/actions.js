@@ -37,12 +37,6 @@ export function addNewResponse(response) {
   return { type : ADD_NEW_RESPONSE, response };
 }
 
-export const SELECT_REQUEST = 'SELECT_REQUEST';
-
-export function selectRequest(request) {
-  return { type : SELECT_REQUEST, request };
-}
-
 export const TOGGLE_REQUEST_LIST_ITEM = 'TOGGLE_REQUEST_LIST_ITEM';
 
 export function toggleRequestListItem(request) {
