@@ -4,15 +4,19 @@ import RequestListItem from './RequestListItem.jsx'
 export default class RequestsList extends Component {
   componentWillMount() {
   }
+  
+  getListItemState(req) {
+    const { requestListItems } = this.props;
+    return requestListItems[req._id] || null;
+  }
 
   render() {
-    const { requests, selectedRequest, actions } = this.props;
-    const isSelected = (req) => !!(selectedRequest && req._id === selectedRequest._id);
+    const { requests, actions } = this.props;
     return (
       <table className='table table-sm table-hover'>
         <tbody>
           {requests.map(req => 
-            <RequestListItem key={req._id} request={req} actions={actions} isSelected={isSelected(req)} />
+            <RequestListItem key={req._id} request={req} actions={actions} itemState={this.getListItemState(req)} />
           )}
         </tbody>
       </table>
@@ -22,6 +26,6 @@ export default class RequestsList extends Component {
 
 RequestsList.propTypes = {
   requests: PropTypes.array.isRequired,
-  selectedRequest: PropTypes.object,
+  requestListItems: PropTypes.object,
   actions: PropTypes.object.isRequired,
 }

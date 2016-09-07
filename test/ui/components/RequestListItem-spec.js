@@ -10,10 +10,10 @@ describe('components RequestListItem', () => {
   function setup(p) {
     const props = _.merge({
       request: chance.data.savedRequest(),
+      itemState: { expanded: false },
       actions: {
-        selectRequest: sinon.spy(),
+        toggleRequestListItem: sinon.spy(),
       },
-      isSelected: false,
     }, p);
 
     const enzymeWrapper = shallow(<RequestListItem {...props} />);
@@ -24,12 +24,9 @@ describe('components RequestListItem', () => {
     };
   }
 
-  it('should render RequestListItem for each request', () => {
+  it('should render RequestListItem', () => {
     const { enzymeWrapper, props } = setup();
     const request = props.request.request;
-
-    const tr = enzymeWrapper.find('tr');
-    expect(tr.props().className).to.eql(null);
 
     const span = enzymeWrapper.find('span.tag.tag-default');
     expect(span.text()).to.eql(request.method);
@@ -38,16 +35,10 @@ describe('components RequestListItem', () => {
     expect(button.text()).to.eql(`${request.protocol}://${request.host}${request.path}`);
   });
 
-  it('should select request on button click', () => {
+  it('should invoke toggle action on button click', () => {
     const { enzymeWrapper, props } = setup();
     const button = enzymeWrapper.find('button');
     button.props().onClick();
-    expect(props.actions.selectRequest).to.have.been.calledWith(props.request);
-  });
-
-  it('should add special class for selected item', () => {
-    const { enzymeWrapper } = setup({ isSelected: true });
-    const tr = enzymeWrapper.find('tr');
-    expect(tr.props().className).to.eql('table-active');
+    expect(props.actions.toggleRequestListItem).to.have.been.calledWith(props.request);
   });
 });

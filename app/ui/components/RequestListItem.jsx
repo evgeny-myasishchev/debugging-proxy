@@ -5,14 +5,14 @@ export default class RequestListItem extends Component {
   }
 
   render() {
-    const { request, isSelected } = this.props;
-    const { selectRequest } = this.props.actions;
+    const { request } = this.props;
+    const { toggleRequestListItem } = this.props.actions;
     const href = `${request.request.protocol}://${request.request.host}${request.request.path}`
     return (
-      <tr className={isSelected ? 'table-active' : null}>
-        <td><span className='tag tag-default'>{request.request.method}</span> </td>
+      <tr>
+        <td><span className='tag tag-default'>{request.request.method}</span></td>
         <td>
-          <button title={href} className="btn btn-sm btn-link" onClick={() => selectRequest(request)}>
+          <button title={href} className="btn btn-sm btn-link" onClick={() => toggleRequestListItem(request)}>
             {href}
           </button>
         </td>
@@ -23,6 +23,6 @@ export default class RequestListItem extends Component {
 
 RequestListItem.propTypes = {
   request: PropTypes.object.isRequired,
-  actions: PropTypes.object.isRequired,
-  isSelected: PropTypes.bool.isRequired
+  itemState: PropTypes.object,
+  actions: PropTypes.object.isRequired
 }

@@ -12,11 +12,11 @@ describe('containers App', () => {
       requests: _.merge({
         entries: [],
         isFetching: false,
-        selectedRequest: null,
       }, p),
       actions: {
         fetchRequests: sinon.spy(),
       },
+      requestListItems: { dummy: chance.word() },
     };
 
     const enzymeWrapper = shallow(<App {...props} />);
@@ -44,7 +44,7 @@ describe('containers App', () => {
     const requestsList = enzymeWrapper.find('RequestsList');
     expect(requestsList.props().requests).to.eql([req1, req2]);
     expect(requestsList.props().actions).to.eql(props.actions);
-    expect(requestsList.props().selectedRequest).to.eql(req2);
+    expect(requestsList.props().requestListItems).to.eql(props.requestListItems);
   });
 
   it('should render loading if fetching', () => {
@@ -52,12 +52,5 @@ describe('containers App', () => {
     const loading = enzymeWrapper.find('div.tag.tag-info');
     expect(loading.length).to.eql(1);
     expect(loading.props().children).to.eql('Loading requests...');
-  });
-
-  it('should render RequestDetails with selected request', () => {
-    const req1 = chance.data.savedRequest();
-    const { enzymeWrapper } = setup({ selectedRequest: req1 });
-    const requestDetails = enzymeWrapper.find('RequestDetails');
-    expect(requestDetails.props().request).to.eql(req1);
   });
 });

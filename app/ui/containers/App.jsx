@@ -4,7 +4,6 @@ import React, { Component, PropTypes } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import * as actions from '../actions'
-import RequestDetails from '../components/RequestDetails.jsx'
 import RequestsList from '../components/RequestsList.jsx'
 
 export class App extends Component {
@@ -26,27 +25,24 @@ export class App extends Component {
   }
   
   renderEntries() {
-    const { entries, selectedRequest } = this.props.requests;
+    const { 
+      actions, 
+      requests : {entries: entries}, 
+      requestListItems
+    } = this.props;
     return (
-      <RequestsList selectedRequest={selectedRequest} requests={entries} actions={this.props.actions} />
+      <RequestsList requests={entries} actions={actions} requestListItems={requestListItems} />
     )
   }
 
   render() {
-    const { isFetching, selectedRequest } = this.props.requests;
+    const { isFetching } = this.props.requests;
     const renderer = isFetching ? this.renderLoading : this.renderEntries;
     return (
-      <div className="container-fluid">
+      <div>
         <h1>Requests</h1>
         
-        <div className='row'>
-          <div className='col-sm-4'>
-            {renderer.apply(this)}
-          </div>
-          <div className='col-sm-8'>
-            <RequestDetails request={selectedRequest} />
-          </div>
-        </div>
+        {renderer.apply(this)}
       </div>
     );
   }
@@ -54,12 +50,14 @@ export class App extends Component {
 
 App.propTypes = {
   requests: PropTypes.object.isRequired,
-  actions: PropTypes.object.isRequired
+  actions: PropTypes.object.isRequired,
+  requestListItems: PropTypes.object.isRequired,
 }
 
 function mapStateToProps(state) {
   return {
-    requests: state.requests
+    requests: state.requests,
+    requestListItems: state.requestListItems,
   }
 }
 
