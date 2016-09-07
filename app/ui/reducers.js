@@ -29,6 +29,15 @@ function requests(state = { entries: [], isFetching: false, selectedRequest: nul
   return state;
 }
 
+function requestListItems(state = {}, action) {
+  if(action.type === actions.TOGGLE_REQUEST_LIST_ITEM) {
+    const requestId = _.get(action, 'requestId');
+    const expanded = !_.get(state, [requestId, 'expanded'], false);
+    return _.merge({}, state, {[requestId]: { expanded : expanded }});
+  }
+  return state;
+}
+
 // Updates error message to notify about the failed fetches.
 function errorMessage(state = null, action) {
   const { type, error } = action
@@ -45,6 +54,7 @@ function errorMessage(state = null, action) {
 const rootReducer = combineReducers({
   requests,
   errorMessage,
+  requestListItems,
   routing
 })
 

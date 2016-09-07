@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { CALL_API } from './middleware/api'
 
 export const FETCH_REQUESTS = 'FETCH_REQUESTS'
@@ -40,4 +41,12 @@ export const SELECT_REQUEST = 'SELECT_REQUEST';
 
 export function selectRequest(request) {
   return { type : SELECT_REQUEST, request };
+}
+
+export const TOGGLE_REQUEST_LIST_ITEM = 'TOGGLE_REQUEST_LIST_ITEM';
+
+export function toggleRequestListItem(request) {
+  const requestId = _.get(request, '_id');
+  if(!requestId) throw new Error('Provided request does not have an _id property');
+  return { type: TOGGLE_REQUEST_LIST_ITEM, requestId: requestId };
 }

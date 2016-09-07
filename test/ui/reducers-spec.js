@@ -14,22 +14,22 @@ describe('reducers', () => {
     initialState = invoke(undefined, {});
   });
 
-  describe('requests', () => {
-    const reqEntry = () => {
-      const random = chance.word();
-      return {
-        _id: `req-id-${random}`,
-        startedAt: chance.date(),
-        completedAt: chance.date(),
-        request: {
-          dummyReq: `${random}`,
-        },
-        response: {
-          dummyRes: `${random}`,
-        },
-      };
+  const reqEntry = () => {
+    const random = chance.word();
+    return {
+      _id: `req-id-${random}`,
+      startedAt: chance.date(),
+      completedAt: chance.date(),
+      request: {
+        dummyReq: `${random}`,
+      },
+      response: {
+        dummyRes: `${random}`,
+      },
     };
+  };
 
+  describe('requests', () => {
     it('should return initial state', () => {
       expect(initialState.requests).to.eql({
         entries: [],
@@ -146,6 +146,71 @@ describe('reducers', () => {
       const dummyState = { prop1: chance.word(), prop2: chance.word() };
       const state = invoke({ errorMessage: dummyState }, action);
       expect(state.errorMessage).to.eql(dummyState);
+    });
+  });
+
+  describe('requestListItems', () => {
+    let req1;
+    let req2;
+
+    beforeEach(() => {
+      [req1, req2] = [reqEntry(), reqEntry()];
+    });
+
+    it('should create initial empty state', () => {
+      expect(initialState.requestListItems).to.eql({});
+    });
+
+    it('should return unmodified state for unknown action', () => {
+      _.merge(initialState.requestListItems, { dummy: true });
+      const state = invoke(initialState, { type: 'UNKNOWN' });
+      expect(state.requestListItems).to.eql({ dummy: true });
+    });
+
+    it('should set expanded flag for given requestId to true if it was not set', () => {
+      let state = invoke(initialState, actions.toggleRequestListItem(req1));
+      expect(state.requestListItems).to.eql({
+        [_.get(req1, '_id')]: { expanded: true },
+      });
+      state = invoke(state, actions.toggleRequestListItem(req2));
+      expect(state.requestListItems).to.eql({
+        [_.get(req1, '_id')]: { expanded: true },
+        [_.get(req2, '_id')]: { expanded: true },
+      });
+    });
+
+    it('should set expanded flag for given requestId to true if it was false', () => {
+      _.merge(initialState.requestListItems, {
+        [_.get(req1, '_id')]: { expanded: false },
+        [_.get(req2, '_id')]: { expanded: false },
+      });
+      let state = invoke(initialState, actions.toggleRequestListItem(req1));
+      expect(state.requestListItems).to.eql({
+        [_.get(req1, '_id')]: { expanded: true },
+        [_.get(req2, '_id')]: { expanded: false },
+      });
+      state = invoke(state, actions.toggleRequestListItem(req2));
+      expect(state.requestListItems).to.eql({
+        [_.get(req1, '_id')]: { expanded: true },
+        [_.get(req2, '_id')]: { expanded: true },
+      });
+    });
+
+    it('should set expanded flag for given reqeust to false if it was true', () => {
+      _.merge(initialState.requestListItems, {
+        [_.get(req1, '_id')]: { expanded: true },
+        [_.get(req2, '_id')]: { expanded: true },
+      });
+      let state = invoke(initialState, actions.toggleRequestListItem(req1));
+      expect(state.requestListItems).to.eql({
+        [_.get(req1, '_id')]: { expanded: false },
+        [_.get(req2, '_id')]: { expanded: true },
+      });
+      state = invoke(state, actions.toggleRequestListItem(req2));
+      expect(state.requestListItems).to.eql({
+        [_.get(req1, '_id')]: { expanded: false },
+        [_.get(req2, '_id')]: { expanded: false },
+      });
     });
   });
 });

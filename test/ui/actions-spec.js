@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { expect } from 'chai';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
@@ -63,6 +64,19 @@ describe('ui', () => {
         expect(actions.selectRequest(request)).to.eql({
           type: actions.SELECT_REQUEST, request,
         });
+      });
+    });
+
+    describe('toggleRequestListItem', () => {
+      it('should create toggle action for given request', () => {
+        const request = { _id: `req-id-${chance.word()}` };
+        expect(actions.toggleRequestListItem(request)).to.eql({
+          type: actions.TOGGLE_REQUEST_LIST_ITEM, requestId: _.get(request, '_id'),
+        });
+      });
+
+      it('should raise error if provided request does not have _id', () => {
+        expect(() => actions.toggleRequestListItem({ dummy: true })).to.throw(Error, 'Provided request does not have an _id property');
       });
     });
   });
