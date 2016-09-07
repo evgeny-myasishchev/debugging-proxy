@@ -58,15 +58,6 @@ describe('ui', () => {
       });
     });
 
-    describe('selectRequest', () => {
-      it('should create select request action', () => {
-        const request = { dummy: chance.word() };
-        expect(actions.selectRequest(request)).to.eql({
-          type: actions.SELECT_REQUEST, request,
-        });
-      });
-    });
-
     describe('toggleRequestListItem', () => {
       it('should create toggle action for given request', () => {
         const request = { _id: `req-id-${chance.word()}` };

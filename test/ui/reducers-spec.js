@@ -34,7 +34,6 @@ describe('reducers', () => {
       expect(initialState.requests).to.eql({
         entries: [],
         isFetching: false,
-        selectedRequest: null,
       });
     });
 
@@ -112,14 +111,6 @@ describe('reducers', () => {
         expect(state.requests.entries.length).to.eql(3);
         expect(state.requests.entries[1].response).to.eql(res.response);
         expect(state.requests.entries[1].completedAt).to.eql(res.completedAt);
-      });
-    });
-
-    describe('selectRequest', () => {
-      it('should return new state with selected request', () => {
-        const req = reqEntry();
-        const state = invoke(initialState, actions.selectRequest(req));
-        expect(state.requests.selectedRequest).to.eql(req);
       });
     });
   });
