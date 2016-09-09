@@ -40,7 +40,7 @@ describe('containers App', () => {
   it('should render RequestsList if not fetching', () => {
     const req1 = chance.data.savedRequest();
     const req2 = chance.data.savedRequest();
-    const { enzymeWrapper, props } = setup({ entries: [req1, req2], selectedRequest: req2 });
+    const { enzymeWrapper, props } = setup({ entries: [req1, req2] });
     const requestsList = enzymeWrapper.find('RequestsList');
     expect(requestsList.props().requests).to.eql([req1, req2]);
     expect(requestsList.props().actions).to.eql(props.actions);
