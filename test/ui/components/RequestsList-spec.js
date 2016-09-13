@@ -34,11 +34,11 @@ describe('components RequestsList', () => {
     expect(listItems.nodes[0].type).to.eql(RequestListItem);
     expect(listItems.nodes[0].props.request).to.eql(req1);
     expect(listItems.nodes[0].props.actions).to.eql(props.actions);
-    expect(listItems.nodes[0].props.itemState).to.eql(null);
+    expect(listItems.nodes[0].props.itemState).to.eql({});
     expect(listItems.nodes[1].type).to.eql(RequestListItem);
     expect(listItems.nodes[1].props.request).to.eql(req2);
     expect(listItems.nodes[1].props.actions).to.eql(props.actions);
-    expect(listItems.nodes[1].props.itemState).to.eql(null);
+    expect(listItems.nodes[1].props.itemState).to.eql({});
   });
 
   it('should render RequestListItem with itemState', () => {

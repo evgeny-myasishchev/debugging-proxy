@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { Component, PropTypes } from 'react'
 import RequestListItem from './RequestListItem.jsx'
 
@@ -7,19 +8,17 @@ export default class RequestsList extends Component {
   
   getListItemState(req) {
     const { requestListItems } = this.props;
-    return requestListItems[req._id] || null;
+    return _.get(requestListItems, req._id, {});
   }
 
   render() {
     const { requests, actions } = this.props;
     return (
-      <table className='table table-sm table-hover'>
-        <tbody>
-          {requests.map(req => 
-            <RequestListItem key={req._id} request={req} actions={actions} itemState={this.getListItemState(req)} />
-          )}
-        </tbody>
-      </table>
+      <ul className='list-group'>
+        {requests.map(req => 
+          <RequestListItem key={req._id} request={req} actions={actions} itemState={this.getListItemState(req)} />
+        )}
+      </ul>
     )
   }
 }

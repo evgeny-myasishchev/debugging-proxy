@@ -1,19 +1,35 @@
 import React, {Component, PropTypes} from 'react'
+import HttpHeaders from './HttpHeaders.jsx'
 
 export default class RequestDetails extends Component {
   componentWillMount() {}
 
   render() {
     const { 
-      request : { request } 
+      request : { request, response },
     } = this.props;
-    const href = `${request.protocol}://${request.host}/${request.path}`
+    const href = `${request.path}`
     return (
-      <div className='card card-outline-primary'>
-        <div className="card-block">
-          <div className="input-group">
-            <span className="input-group-addon" id="basic-addon1">{request.method}</span>
-            <input readOnly="true" type="text" className="form-control" aria-describedby="basic-addon1" value={href} />
+      <div className='card'>
+          {request.method} {href}
+          <ul className="nav nav-tabs" role="tablist">
+            <li className="nav-item">
+              <a className="nav-link active" data-toggle="tab" href="#home" role="tab">Request</a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" data-toggle="tab" href="#profile" role="tab">Respnse</a>
+            </li>
+          </ul>
+          <div className="tab-content">
+            <div className="tab-pane active" id="home" role="tabpanel">
+              <i>Headers</i>
+              {request.method} {href}
+              <HttpHeaders headers={request.headers} />
+            </div>
+            <div className="tab-pane" id="profile" role="tabpanel">
+              <i>Headers</i>
+              <HttpHeaders headers={response.headers} />
+            </div>
           </div>
         </div>
       </div>
