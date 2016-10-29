@@ -32,7 +32,7 @@ describe('components RequestListItem', () => {
     expect(span.text()).to.eql(request.method);
 
     const button = enzymeWrapper.find('button');
-    expect(button.text()).to.eql(`${request.protocol}://${request.host}${request.path}`);
+    expect(button.text()).to.contain(`${request.protocol}://${request.host}${request.path}`);
   });
 
   it('should invoke toggle action on button click', () => {
