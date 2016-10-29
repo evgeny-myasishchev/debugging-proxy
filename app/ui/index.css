@@ -1,3 +1,22 @@
-.body {
-  background-color: green;
+.table-headers {
+  font-size: 80%;
+  font-weight: 400;
+}
+
+.table-headers td {
+  padding: 0;
+}
+
+/* Header name */
+.table-headers td:first-child {
+  font-weight: bold;
+  white-space: nowrap;
+  text-align: right;
+  padding-right: 0.3rem;
+  padding-left: 0.3rem;
+}
+
+/* Header value */
+.table-headers td:nth-child(2) {
+  width: 99%;
 }
