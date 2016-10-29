@@ -67,7 +67,7 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "mocha --recursive",
-    "start": "node server.js",
+    "start": "node server.js | bunyan",
     "remotedev": "remotedev --hostname=localhost --port=8000"
   },
   "repository": {

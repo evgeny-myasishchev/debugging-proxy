@@ -4,6 +4,14 @@
 
 Web debugging proxy written in JavaScript
 
+# Developing
+
+Install deps: `nvm use && yarn` (npm i -g yarn if don't have it yet)
+
+Start dev server: `npm start`
+
+Start remote dev server: `npm run remotedev`
+
 [travis-image]: https://travis-ci.org/evgeny-myasishchev/debugging-proxy.svg?branch=master
 
 [travis-url]: https://travis-ci.org/evgeny-myasishchev/debugging-proxy
