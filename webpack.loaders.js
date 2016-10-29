@@ -4,12 +4,17 @@ module.exports = [
     exclude: /node_modules/,
     loader: 'babel-loader',
   },
+  // TODO: enable
+  // {
+  //   test: /[\/\\](node_modules)[\/\\].*\.css$/,
+  //   loaders: [
+  //     'style?sourceMap',
+  //     'css',
+  //   ],
+  // },
   {
-    test: /[\/\\](node_modules)[\/\\].*\.css$/,
-    loaders: [
-      'style?sourceMap',
-      'css',
-    ],
+    test: /\.css$/,
+    loaders: ['style', 'css'],
   },
   {
     test: /\.eot(\?.*)?$/,

@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import React, { Component, PropTypes } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
+import '../index.css';
 import * as actions from '../actions'
 import RequestsList from '../components/RequestsList.jsx'
 
@@ -41,7 +42,7 @@ export class App extends Component {
     return (
       <div>
         <h1>Requests</h1>
-        
+
         {renderer.apply(this)}
       </div>
     );
