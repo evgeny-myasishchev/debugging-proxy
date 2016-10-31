@@ -16,6 +16,21 @@ export function fetchRequests() {
   })
 }
 
+export const FETCH_REQUEST_BODY = 'FETCH_REQUEST_BODY'
+export const FETCH_REQ_BODY_SUCCESS = 'FETCH_REQ_BODY_SUCCESS'
+export const FETCH_REQ_BODY_FAILURE = 'FETCH_REQ_BODY_FAILURE'
+
+// Fetches a single user from Github API.
+// Relies on the custom API middleware defined in ../middleware/api.js.
+export function fetchRequestBody(requestId) {
+  return (despatch) => despatch({
+    [CALL_API]: {
+      types: [ FETCH_REQUEST_BODY, FETCH_REQ_BODY_SUCCESS, FETCH_REQ_BODY_FAILURE ],
+      endpoint: `/api/v1/requests/${requestId}`
+    }
+  })
+}
+
 export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE'
 
 // Resets the currently visible error message.

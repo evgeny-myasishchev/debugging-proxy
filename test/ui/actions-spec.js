@@ -23,13 +23,26 @@ describe('ui', () => {
   describe('actions', () => {
     describe('fetchRequests', () => {
       it('should despatch api action to fetch requests', () => {
-        const store = mockStore({ todos: [] });
+        const store = mockStore({ });
         store.dispatch(actions.fetchRequests());
         expect(store.getActions().length).to.eql(1);
         const action = store.getActions()[0];
         expect(action.type).to.eql(CALL_API);
         expect(action.original.types).to.eql([actions.FETCH_REQUESTS, actions.FETCH_SUCCESS, actions.FETCH_FAILURE]);
         expect(action.original.endpoint).to.eql('/api/v1/requests');
+      });
+    });
+
+    describe('fetchRequestBody', () => {
+      it('should despatch api action to fetch single request body', () => {
+        const requestId = chance.guid();
+        const store = mockStore({ });
+        store.dispatch(actions.fetchRequestBody(requestId));
+        expect(store.getActions().length).to.eql(1);
+        const action = store.getActions()[0];
+        expect(action.type).to.eql(CALL_API);
+        expect(action.original.types).to.eql([actions.FETCH_REQUEST_BODY, actions.FETCH_REQ_BODY_SUCCESS, actions.FETCH_REQ_BODY_FAILURE]);
+        expect(action.original.endpoint).to.eql(`/api/v1/requests/${requestId}`);
       });
     });
 
