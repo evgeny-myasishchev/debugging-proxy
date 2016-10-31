@@ -4,7 +4,7 @@ import RequestDetails from './RequestDetails.jsx'
 export default class RequestListItem extends Component {
   componentWillMount() {
   }
-  
+
   renderRequestDetails() {
     return (
       <RequestDetails {...this.props} />
@@ -18,15 +18,13 @@ export default class RequestListItem extends Component {
     const {
       rowClass,
       caret
-    } = expanded ? 
-      { rowClass : 'list-group-item list-group-item-info', caret: 'fa-lg fa fa-caret-down' } : 
+    } = expanded ?
+      { rowClass : 'list-group-item list-group-item-info', caret: 'fa-lg fa fa-caret-down' } :
       { rowClass : 'list-group-item ', caret: 'fa-lg fa fa-caret-right' };
     return (
       <div className={rowClass}>
         <button title={href} className="btn btn-sm btn-link" onClick={() => toggleRequestListItem(request)}>
-          <i className={caret} aria-hidden="true" />
-          <span className='tag tag-default'>{request.request.method}</span>
-          {href}
+          <i className={caret} aria-hidden="true" /> <span className='tag tag-default'>{request.request.method}</span> {href}
         </button>
         {expanded ? this.renderRequestDetails() : ''}
       </div>
