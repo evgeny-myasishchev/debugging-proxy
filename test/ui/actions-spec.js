@@ -10,7 +10,7 @@ function handleApiAction() {
   return (next) => (action) => {
     const callAPI = action[CALL_API];
     if (callAPI) {
-      return next({ type: CALL_API, original: callAPI });
+      return next({ type: CALL_API, callAPI, original: action });
     }
     return next(action);
   };
@@ -28,21 +28,42 @@ describe('ui', () => {
         expect(store.getActions().length).to.eql(1);
         const action = store.getActions()[0];
         expect(action.type).to.eql(CALL_API);
-        expect(action.original.types).to.eql([actions.FETCH_REQUESTS, actions.FETCH_SUCCESS, actions.FETCH_FAILURE]);
-        expect(action.original.endpoint).to.eql('/api/v1/requests');
+        expect(action.callAPI.types).to.eql([actions.FETCH_REQUESTS, actions.FETCH_SUCCESS, actions.FETCH_FAILURE]);
+        expect(action.callAPI.endpoint).to.eql('/api/v1/requests');
       });
     });
 
     describe('fetchRequestBody', () => {
       it('should despatch api action to fetch single request body', () => {
-        const requestId = chance.guid();
+        const req = chance.data.savedRequest();
+        req.request.method = chance.pickone(['POST', 'PUT', 'DELETE']);
+        const requestId = _.get(req, '_id');
         const store = mockStore({ });
-        store.dispatch(actions.fetchRequestBody(requestId));
+        store.dispatch(actions.fetchRequestBody(req));
         expect(store.getActions().length).to.eql(1);
         const action = store.getActions()[0];
         expect(action.type).to.eql(CALL_API);
-        expect(action.original.types).to.eql([actions.FETCH_REQUEST_BODY, actions.FETCH_REQ_BODY_SUCCESS, actions.FETCH_REQ_BODY_FAILURE]);
-        expect(action.original.endpoint).to.eql(`/api/v1/requests/${requestId}`);
+        expect(action.original.request).to.eql(req);
+        expect(action.callAPI.types).to.eql([actions.FETCH_REQUEST_BODY, actions.FETCH_REQ_BODY_SUCCESS, actions.FETCH_REQ_BODY_FAILURE]);
+        expect(action.callAPI.endpoint).to.eql(`/api/v1/requests/${requestId}`);
+      });
+
+      it('should despatch has no body action for get request', () => {
+        const req = chance.data.savedRequest();
+        req.request.method = 'GET';
+        const store = mockStore({ });
+        store.dispatch(actions.fetchRequestBody(req));
+        expect(store.getActions().length).to.eql(1);
+        const action = store.getActions()[0];
+        expect(action).to.eql(actions.fetchRequestHasNoBody(req));
+      });
+    });
+
+    describe('fetchRequestHasNoBody', () => {
+      it('should create has no body action with given request', () => {
+        const request = chance.data.savedRequest();
+        const action = actions.fetchRequestHasNoBody(request);
+        expect(action).to.eql({ type: actions.FETCH_REQ_HAS_NO_BODY, request });
       });
     });
 

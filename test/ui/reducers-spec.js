@@ -160,49 +160,98 @@ describe('reducers', () => {
       expect(state.requestListItems).to.eql({ dummy: true });
     });
 
-    it('should set expanded flag for given requestId to true if it was not set', () => {
-      let state = invoke(initialState, actions.toggleRequestListItem(req1));
-      expect(state.requestListItems).to.eql({
-        [_.get(req1, '_id')]: { expanded: true },
+    describe('TOGGLE_REQUEST_LIST_ITEM', () => {
+      it('should set expanded flag for given requestId to true if it was not set', () => {
+        let state = invoke(initialState, actions.toggleRequestListItem(req1));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { expanded: true },
+        });
+        state = invoke(state, actions.toggleRequestListItem(req2));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { expanded: true },
+          [_.get(req2, '_id')]: { expanded: true },
+        });
       });
-      state = invoke(state, actions.toggleRequestListItem(req2));
-      expect(state.requestListItems).to.eql({
-        [_.get(req1, '_id')]: { expanded: true },
-        [_.get(req2, '_id')]: { expanded: true },
+
+      it('should set expanded flag for given requestId to true if it was false', () => {
+        _.merge(initialState.requestListItems, {
+          [_.get(req1, '_id')]: { expanded: false },
+          [_.get(req2, '_id')]: { expanded: false },
+        });
+        let state = invoke(initialState, actions.toggleRequestListItem(req1));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { expanded: true },
+          [_.get(req2, '_id')]: { expanded: false },
+        });
+        state = invoke(state, actions.toggleRequestListItem(req2));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { expanded: true },
+          [_.get(req2, '_id')]: { expanded: true },
+        });
+      });
+
+      it('should set expanded flag for given reqeust to false if it was true', () => {
+        _.merge(initialState.requestListItems, {
+          [_.get(req1, '_id')]: { expanded: true },
+          [_.get(req2, '_id')]: { expanded: true },
+        });
+        let state = invoke(initialState, actions.toggleRequestListItem(req1));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { expanded: false },
+          [_.get(req2, '_id')]: { expanded: true },
+        });
+        state = invoke(state, actions.toggleRequestListItem(req2));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { expanded: false },
+          [_.get(req2, '_id')]: { expanded: false },
+        });
       });
     });
 
-    it('should set expanded flag for given requestId to true if it was false', () => {
-      _.merge(initialState.requestListItems, {
-        [_.get(req1, '_id')]: { expanded: false },
-        [_.get(req2, '_id')]: { expanded: false },
+    describe.only('fetch req body', () => {
+      it('should set isFetchingBody to true when fetching', () => {
+        const state = invoke(initialState, { type: actions.FETCH_REQUEST_BODY, request: req1 });
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: {
+            req: { isFetchingBody: true, hasNoBody: false },
+          },
+        });
       });
-      let state = invoke(initialState, actions.toggleRequestListItem(req1));
-      expect(state.requestListItems).to.eql({
-        [_.get(req1, '_id')]: { expanded: true },
-        [_.get(req2, '_id')]: { expanded: false },
-      });
-      state = invoke(state, actions.toggleRequestListItem(req2));
-      expect(state.requestListItems).to.eql({
-        [_.get(req1, '_id')]: { expanded: true },
-        [_.get(req2, '_id')]: { expanded: true },
-      });
-    });
 
-    it('should set expanded flag for given reqeust to false if it was true', () => {
-      _.merge(initialState.requestListItems, {
-        [_.get(req1, '_id')]: { expanded: true },
-        [_.get(req2, '_id')]: { expanded: true },
+      it('should set isFetchingBody to false and body on fetch success', () => {
+        const body = chance.sentence();
+        const reqId = _.get(req1, '_id');
+        _.set(initialState, `requestListItems[${reqId}]`, { req: { isFetchingBody: true, hasNoBody: false } });
+        const state = invoke(initialState, { type: actions.FETCH_REQ_BODY_SUCCESS, request: req1, response: body });
+        expect(state.requestListItems).to.eql({
+          [reqId]: {
+            req: { isFetchingBody: false, bodyFetched: true, hasNoBody: false, body },
+          },
+        });
       });
-      let state = invoke(initialState, actions.toggleRequestListItem(req1));
-      expect(state.requestListItems).to.eql({
-        [_.get(req1, '_id')]: { expanded: false },
-        [_.get(req2, '_id')]: { expanded: true },
+
+      it('should set isFetchingBody to false and reason on fetch failure', () => {
+        const reason = {
+          statusCode: `status-${chance.word()}`,
+          statusMessage: `status-msg-${chance.word()}`,
+        };
+        const reqId = _.get(req1, '_id');
+        _.set(initialState, `requestListItems[${reqId}]`, { req: { isFetchingBody: true, hasNoBody: false } });
+        const state = invoke(initialState, { type: actions.FETCH_REQ_BODY_FAILURE, request: req1, error: reason });
+        expect(state.requestListItems).to.eql({
+          [reqId]: {
+            req: { isFetchingBody: false, bodyFetched: false, hasNoBody: false, reason },
+          },
+        });
       });
-      state = invoke(state, actions.toggleRequestListItem(req2));
-      expect(state.requestListItems).to.eql({
-        [_.get(req1, '_id')]: { expanded: false },
-        [_.get(req2, '_id')]: { expanded: false },
+
+      it('should set isFetchingBody to false and hasNoBody to true if has no body', () => {
+        const state = invoke(initialState, actions.fetchRequestHasNoBody(req1));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: {
+            req: { isFetchingBody: false, hasNoBody: true },
+          },
+        });
       });
     });
   });

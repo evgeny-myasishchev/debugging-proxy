@@ -32,6 +32,22 @@ function requestListItems(state = {}, action) {
     const expanded = !_.get(state, [requestId, 'expanded'], false);
     return _.merge({}, state, {[requestId]: { expanded : expanded }});
   }
+  if (action.type === actions.FETCH_REQUEST_BODY) {
+    const requestId = _.get(action, 'request._id');
+    return _.merge({}, state, {[requestId]: { req : { hasNoBody : false, isFetchingBody : true } }});
+  }
+  if (action.type === actions.FETCH_REQ_BODY_SUCCESS) {
+    const requestId = _.get(action, 'request._id');
+    return _.merge({}, state, {[requestId]: { req : { isFetchingBody : false, bodyFetched : true, body : action.response } }});
+  }
+  if (action.type === actions.FETCH_REQ_BODY_FAILURE) {
+    const requestId = _.get(action, 'request._id');
+    return _.merge({}, state, {[requestId]: { req : { isFetchingBody : false, bodyFetched : false, reason : action.error } }});
+  }
+  if (action.type === actions.FETCH_REQ_HAS_NO_BODY) {
+    const requestId = _.get(action, 'request._id');
+    return _.merge({}, state, {[requestId]: { req : { hasNoBody : true, isFetchingBody : false } }});
+  }
   return state;
 }
 
