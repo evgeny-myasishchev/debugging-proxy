@@ -37,46 +37,41 @@ describe('reducers', () => {
       });
     });
 
-    it('should handle fetch requests', () => {
-      const action = { type: actions.FETCH_REQUESTS };
-      initialState.requests.entries = [reqEntry(), reqEntry()];
-      const state = invoke(initialState, action);
-      expect(state.requests.isFetching).to.eql(true);
-      expect(state).not.to.eql(initialState);
-      initialState.requests.isFetching = true;
-      expect(state).to.eql(initialState);
-    });
+    describe('FETCH_REQUESTS', () => {
+      it('should handle fetch requests', () => {
+        const action = { type: actions.FETCH_REQUESTS };
+        initialState.requests.entries = [reqEntry(), reqEntry()];
+        const state = invoke(initialState, action);
+        expect(state.requests.isFetching).to.eql(true);
+        expect(state).not.to.eql(initialState);
+        initialState.requests.isFetching = true;
+        expect(state).to.eql(initialState);
+      });
 
-    it('should handle fetch success', () => {
-      const entries = [{ entry1: true }, { entry2: true }];
-      const action = { type: actions.FETCH_SUCCESS, response: entries };
-      initialState.requests.isFetching = true;
-      initialState.requests.entries = [reqEntry(), reqEntry()];
-      const state = invoke(initialState, action);
-      expect(state.requests.isFetching).to.eql(false);
-      expect(state.requests.entries).to.eql(entries);
-      expect(state).not.to.eql(initialState);
-      initialState.requests.isFetching = false;
-      initialState.requests.entries = entries;
-      expect(state).to.eql(initialState);
-    });
+      it('should handle fetch success', () => {
+        const entries = [{ entry1: true }, { entry2: true }];
+        const action = { type: actions.FETCH_SUCCESS, response: entries };
+        initialState.requests.isFetching = true;
+        initialState.requests.entries = [reqEntry(), reqEntry()];
+        const state = invoke(initialState, action);
+        expect(state.requests.isFetching).to.eql(false);
+        expect(state.requests.entries).to.eql(entries);
+        expect(state).not.to.eql(initialState);
+        initialState.requests.isFetching = false;
+        initialState.requests.entries = entries;
+        expect(state).to.eql(initialState);
+      });
 
-    it('should sort request by startedAt date', () => {
-      const req1 = reqEntry();
-      const req2 = reqEntry();
-      const req3 = reqEntry();
-      const entries = [req1, req2, req3];
-      const action = { type: actions.FETCH_SUCCESS, response: entries };
-      const state = invoke(initialState, action);
-      const ordered = _.orderBy(entries, 'startedAt', 'desc');
-      expect(state.requests.entries).to.eql(ordered);
-    });
-
-    it('should return state for unknown actions', () => {
-      const action = { type: 'UNSUPPORTED-ACTION' };
-      const dummyState = { prop1: chance.word(), prop2: chance.word() };
-      const state = invoke({ requests: dummyState }, action);
-      expect(state.requests).to.eql(dummyState);
+      it('should sort request by startedAt date', () => {
+        const req1 = reqEntry();
+        const req2 = reqEntry();
+        const req3 = reqEntry();
+        const entries = [req1, req2, req3];
+        const action = { type: actions.FETCH_SUCCESS, response: entries };
+        const state = invoke(initialState, action);
+        const ordered = _.orderBy(entries, 'startedAt', 'desc');
+        expect(state.requests.entries).to.eql(ordered);
+      });
     });
 
     describe('ADD_NEW_REQUEST', () => {
@@ -112,6 +107,13 @@ describe('reducers', () => {
         expect(state.requests.entries[1].response).to.eql(res.response);
         expect(state.requests.entries[1].completedAt).to.eql(res.completedAt);
       });
+    });
+
+    it('should return state for unknown actions', () => {
+      const action = { type: 'UNSUPPORTED-ACTION' };
+      const dummyState = { prop1: chance.word(), prop2: chance.word() };
+      const state = invoke({ requests: dummyState }, action);
+      expect(state.requests).to.eql(dummyState);
     });
   });
 
