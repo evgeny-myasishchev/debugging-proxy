@@ -38,6 +38,7 @@ export default (apiRoot) => () => next => action => {
       if (!response.ok) {
         return Promise.reject(response);
       }
+      //TODO: Only if content/type is application/json
       return response.json();
     })
     .then(response => {
