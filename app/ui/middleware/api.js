@@ -38,8 +38,12 @@ export default (apiRoot) => () => next => action => {
       if (!response.ok) {
         return Promise.reject(response);
       }
-      //TODO: Only if content/type is application/json
-      return response.json();
+      if(response.headers.has('content-type') &&
+        //can be "applicaiton/json; charset: utf-8"
+        response.headers.get('content-type').startsWith('application/json')) {
+        return response.json();
+      }
+      return response.text();
     })
     .then(response => {
       next(actionWith({

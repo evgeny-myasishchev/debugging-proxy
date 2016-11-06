@@ -72,10 +72,55 @@ describe('ui middleware api', () => {
     }, action));
   });
 
-  it('should fetch the data and dispatch success action with response', (done) => {
+  it('should fetch json data and dispatch success action with response', (done) => {
     const action = buildAction(actionData());
     const data = { fake: chance.word() };
-    fetchMock.mock(`${apiRoot}${action[CALL_API].endpoint}`, { status: 200, body: data });
+    fetchMock.mock(`${apiRoot}${action[CALL_API].endpoint}`, {
+      status: 200,
+      body: data,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    fn(next)(action)
+      .then(() => {
+        expect(next).to.have.been.calledWith(_.merge({
+          type: action[CALL_API].types[1],
+          response: data,
+        }, action));
+      })
+      .then(done)
+      .catch(done);
+  });
+
+  it('should fetch json (with encoding) data and dispatch success action with response', (done) => {
+    const action = buildAction(actionData());
+    const data = { fake: chance.word() };
+    fetchMock.mock(`${apiRoot}${action[CALL_API].endpoint}`, {
+      status: 200,
+      body: data,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+    });
+    fn(next)(action)
+      .then(() => {
+        expect(next).to.have.been.calledWith(_.merge({
+          type: action[CALL_API].types[1],
+          response: data,
+        }, action));
+      })
+      .then(done)
+      .catch(done);
+  });
+
+  it('should fetch other data as text and dispatch success action with response', (done) => {
+    const action = buildAction(actionData());
+    const data = chance.sentence();
+    fetchMock.mock(`${apiRoot}${action[CALL_API].endpoint}`, {
+      status: 200,
+      body: data,
+    });
     fn(next)(action)
       .then(() => {
         expect(next).to.have.been.calledWith(_.merge({
