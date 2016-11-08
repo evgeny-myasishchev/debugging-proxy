@@ -6,11 +6,18 @@ export default class HttpBody extends Component {
   render() {
     const {
       state : {
+        isFetchingBody,
         body
       }
     } = this.props;
     return (
-      <div>{body}</div>
+      <div>
+        { isFetchingBody ? (
+          <span>Fetching...</span>
+        ) : (
+          <span>{body}</span>
+        )}
+      </div>
     )
   }
 }
