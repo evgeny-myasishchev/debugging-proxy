@@ -11,40 +11,52 @@ export default class RequestDetails extends Component {
       actions : { fetchRequestBody }
     } = this.props;
 
-    if(!_.get(itemState, 'req.hasNoBody', false) || !_.get(itemState, 'req.bodyFetched', false)) {
+    if(!_.get(itemState, 'req.hasNoBody', false) && !_.get(itemState, 'req.bodyFetched', false)) {
       fetchRequestBody(request);
     }
   }
 
+  renderRequestBody() {
+    const {
+      itemState
+    } = this.props;
+    if(!_.has(itemState, 'req')) return false;
+    if(_.get(itemState, 'req.hasNoBody', true)) return false;
+    const reqState = itemState.req;
+    return (
+      <div>
+        <h4 className='card-title'>Body</h4>
+        <div className='card card-outline-secondary'>
+          <HttpBody state={reqState} />
+        </div>
+      </div>
+    )
+  }
+
   render() {
     const {
-      itemState,
       request: {
         request,
         // response
       }
     } = this.props;
-    const reqState = itemState.req;
     return (
       <div className='card'>
         <div className="card-header">
           <ul className="nav nav-tabs card-header-tabs float-xs-left" role="tablist">
             <li className="nav-item">
-              <a className="nav-link active" data-toggle="tab" href="#home" role="tab">Request</a>
+              <a className="nav-link active" data-toggle="tab" href="#request-details" role="tab">Request</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" data-toggle="tab" href="#profile" role="tab">Respnse</a>
+              <a className="nav-link" data-toggle="tab" href="#response-details" role="tab">Respnse</a>
             </li>
           </ul>
         </div>
         <div className="card-block">
-          <div id="home" role="tabpanel">
+          <div id="request-details" role="tabpanel">
             <h4 className='card-title'>Headers</h4>
             <HttpHeaders headers={request.headers} />
-            <h4 className='card-title'>Body</h4>
-            <div className='card card-outline-secondary'>
-              <HttpBody state={reqState} />
-            </div>
+            { this.renderRequestBody() }
           </div>
           {
             //   <div role="tabpanel">
