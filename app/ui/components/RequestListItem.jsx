@@ -20,7 +20,7 @@ export default class RequestListItem extends Component {
       caret
     } = expanded ?
       { rowClass : 'list-group-item list-group-item-info', caret: 'fa-lg fa fa-caret-down' } :
-      { rowClass : 'list-group-item ', caret: 'fa-lg fa fa-caret-right' };
+      { rowClass : 'list-group-item', caret: 'fa-lg fa fa-caret-right' };
     return (
       <div className={rowClass}>
         <button title={href} className="btn btn-sm btn-link" onClick={() => toggleRequestListItem(request)}>
