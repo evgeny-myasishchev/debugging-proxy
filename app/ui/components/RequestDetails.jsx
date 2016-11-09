@@ -24,6 +24,15 @@ export default class RequestDetails extends Component {
     }
   }
 
+  hasResponse() {
+    return _.has(this.props, 'request.response');
+  }
+
+  activeTab() {
+    if(!this.hasResponse()) return 'request';
+    return _.get(this.props, 'itemState.activeTab', 'request');
+  }
+
   renderHttpBody(stateName) {
     const {
       itemState
@@ -41,30 +50,33 @@ export default class RequestDetails extends Component {
     )
   }
 
-  renderNavTab(href, name, isActive) {
+  renderNavTab(href, name, isActive, isDisabled) {
+    const classes = ['nav-link'];
+    if(isActive) classes.push('active');
+    if(isDisabled) classes.push('disabled');
     return (
       <li className="nav-item">
-        <a className={isActive ? 'nav-link active' : 'nav-link'} data-toggle="tab" href={'#' + href} role="tab">{name}</a>
+        <a className={classes.join(' ')} data-toggle="tab" href={'#' + href} role="tab">{name}</a>
       </li>
     )
   }
 
+
   render() {
     const {
-      itemState: {
-        activeTab: activeTab = 'request'
-      },
       request: {
         request,
         response
       }
     } = this.props;
+    const activeTab = this.activeTab();
+
     return (
       <div className='card'>
         <div className="card-header">
           <ul className="nav nav-tabs card-header-tabs float-xs-left" role="tablist">
             {this.renderNavTab('request', 'Request', activeTab === 'request')}
-            {this.renderNavTab('response', 'Response', activeTab === 'response')}
+            {this.renderNavTab('response', 'Response', activeTab === 'response', !this.hasResponse())}
           </ul>
         </div>
         <div className="card-block">

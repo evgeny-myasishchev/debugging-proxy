@@ -9,7 +9,7 @@ import chance from '../../support/chance';
 describe('components RequestDetails', () => {
   function setup(p) {
     const props = _.merge({
-      request: chance.data.savedRequest(),
+      request: _.get(p, 'request', chance.data.savedRequest()),
       itemState: { },
       actions: {
         fetchRequestBody: sinon.spy(),
@@ -50,6 +50,17 @@ describe('components RequestDetails', () => {
 
     const responseTab = enzymeWrapper.find('[href="#response"]');
     expect(responseTab.props().className).to.eql('nav-link active');
+  });
+
+  it('should render response as disabled and not active tab if no response', () => {
+    const request = chance.data.savedRequest();
+    delete request.response;
+    const { enzymeWrapper } = setup({ request, itemState: { activeTab: 'response' } });
+    const requestTab = enzymeWrapper.find('[href="#request"]');
+    expect(requestTab.props().className).to.eql('nav-link active');
+
+    const responseTab = enzymeWrapper.find('[href="#response"]');
+    expect(responseTab.props().className).to.eql('nav-link disabled');
   });
 
   describe('req', () => {
