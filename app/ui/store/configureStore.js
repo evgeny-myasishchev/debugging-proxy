@@ -13,11 +13,11 @@ export default function configureStore(apiRoot, preloadedState) {
        hostname : 'localhost',
        port : 8000
      }),
-     persistState(getDebugSessionKey)
+     persistState(getDebugSessionKey())
    ] : [];
-  
+
   const enhancer = compose(
-    applyMiddleware(thunk, api(apiRoot)), 
+    applyMiddleware(thunk, api(apiRoot)),
     ...devToolsEnhancers
   );
   const store = createStore(rootReducer, preloadedState, enhancer);
@@ -26,7 +26,7 @@ export default function configureStore(apiRoot, preloadedState) {
     // Enable Webpack hot module replacement for reducers
     module.hot.accept('../reducers', () => {
       const nextRootReducer = require('../reducers').default
-  
+
       store.replaceReducer(nextRootReducer)
     })
   }
