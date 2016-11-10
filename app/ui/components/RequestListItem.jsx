@@ -1,6 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import RequestDetails from './RequestDetails.jsx'
 
+const responseStatusTags = [
+  null, 'tag-info', 'tag-success', 'tag-default', 'tag-warning', 'tag-danger'
+]
+
 export default class RequestListItem extends Component {
   componentWillMount() {
   }
@@ -11,8 +15,17 @@ export default class RequestListItem extends Component {
     )
   }
 
+  renderResponseStatus(response) {
+    if(!response) return null;
+    const statusCodeClass = responseStatusTags[Math.floor(response.statusCode / 100)];
+    return (
+      <div id='response-status-code' className={`tag ${statusCodeClass}`}>{response.statusCode} {response.statusMessage}</div>
+    )
+  }
+
   render() {
     const { request, itemState : { expanded : expanded } } = this.props;
+    const response = request.response;
     const { toggleRequestListItem } = this.props.actions;
     const href = `${request.request.protocol}://${request.request.host}${request.request.path}`
     const {
@@ -26,6 +39,7 @@ export default class RequestListItem extends Component {
         <button title={href} className="btn btn-sm btn-link" onClick={() => toggleRequestListItem(request)}>
           <i className={caret} aria-hidden="true" /> <span className='tag tag-default'>{request.request.method}</span> {href}
         </button>
+        {this.renderResponseStatus(response)}
         {expanded ? this.renderRequestDetails() : ''}
       </div>
     )

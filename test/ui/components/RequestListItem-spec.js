@@ -9,7 +9,7 @@ import chance from '../../support/chance';
 describe('components RequestListItem', () => {
   function setup(p) {
     const props = _.merge({
-      request: chance.data.savedRequest(),
+      request: _.get(p, 'request', chance.data.savedRequest()),
       itemState: { expanded: false },
       actions: {
         toggleRequestListItem: sinon.spy(),
@@ -23,6 +23,60 @@ describe('components RequestListItem', () => {
       enzymeWrapper,
     };
   }
+
+  describe('response status code', () => {
+    function renderComponent(statusCode) {
+      const request = chance.data.savedRequest();
+      request.response.statusCode = statusCode;
+      const { enzymeWrapper } = setup({ request });
+      return {
+        response: request.response,
+        element: enzymeWrapper.find('#response-status-code'),
+      };
+    }
+
+    it('should not be rendered if no response', () => {
+      const request = chance.data.savedRequest();
+      delete request.response;
+      const { enzymeWrapper } = setup({ request });
+      expect(enzymeWrapper.find('#response-status-code').length).to.eql(0);
+    });
+
+    it('should be info for 1xx status', () => {
+      const { response, element } = renderComponent(chance.integer({ min: 100, max: 199 }));
+      expect(element.length).to.eql(1);
+      expect(element.props().className).to.eql('tag tag-info');
+      expect(element.text()).to.eql(`${response.statusCode} ${response.statusMessage}`);
+    });
+
+    it('should be success for 2xx status', () => {
+      const { response, element } = renderComponent(chance.integer({ min: 200, max: 299 }));
+      expect(element.length).to.eql(1);
+      expect(element.props().className).to.eql('tag tag-success');
+      expect(element.text()).to.eql(`${response.statusCode} ${response.statusMessage}`);
+    });
+
+    it('should be default for 3xx status', () => {
+      const { response, element } = renderComponent(chance.integer({ min: 300, max: 399 }));
+      expect(element.length).to.eql(1);
+      expect(element.props().className).to.eql('tag tag-default');
+      expect(element.text()).to.eql(`${response.statusCode} ${response.statusMessage}`);
+    });
+
+    it('should be warning for 4xx status', () => {
+      const { response, element } = renderComponent(chance.integer({ min: 400, max: 499 }));
+      expect(element.length).to.eql(1);
+      expect(element.props().className).to.eql('tag tag-warning');
+      expect(element.text()).to.eql(`${response.statusCode} ${response.statusMessage}`);
+    });
+
+    it('should be danger for 5xx status', () => {
+      const { response, element } = renderComponent(chance.integer({ min: 500, max: 599 }));
+      expect(element.length).to.eql(1);
+      expect(element.props().className).to.eql('tag tag-danger');
+      expect(element.text()).to.eql(`${response.statusCode} ${response.statusMessage}`);
+    });
+  });
 
   describe('collapsed', () => {
     let { enzymeWrapper, props } = [null, null];
