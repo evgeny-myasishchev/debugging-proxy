@@ -25,6 +25,15 @@ describe('components RequestsList', () => {
     };
   }
 
+  it('should render no requests message if there are no requests yet', () => {
+    const { enzymeWrapper } = setup({ requests: [] });
+    expect(enzymeWrapper.find('RequestListItem').length).to.eql(0);
+    expect(enzymeWrapper.find('ul.list-group').length).to.eql(0);
+    const alert = enzymeWrapper.find('div.alert-info');
+    expect(alert.length).to.eql(1);
+    expect(alert.text()).to.contain('No requests');
+  });
+
   it('should render RequestListItem for each request', () => {
     const req1 = chance.data.savedRequest();
     const req2 = chance.data.savedRequest();
