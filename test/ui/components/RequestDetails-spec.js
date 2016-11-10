@@ -14,6 +14,7 @@ describe('components RequestDetails', () => {
       actions: {
         fetchRequestBody: sinon.spy(),
         fetchResponseBody: sinon.spy(),
+        activateRequestDetailsTab: sinon.spy(),
       },
     }, p);
 
@@ -43,6 +44,13 @@ describe('components RequestDetails', () => {
     expect(responseTab.props().className).to.eql('nav-link');
   });
 
+  it('should invoke activate tab action on request tab click', () => {
+    const { props, enzymeWrapper } = setup({ itemState: { activatTab: 'response' } });
+    const requestTab = enzymeWrapper.find('[href="#request"]');
+    requestTab.props().onClick({ preventDefault: sinon.spy() });
+    expect(props.actions.activateRequestDetailsTab).to.have.been.calledWith(props.request, 'request');
+  });
+
   it('should render response as active tab if set in state', () => {
     const { enzymeWrapper } = setup({ itemState: { activeTab: 'response' } });
     const requestTab = enzymeWrapper.find('[href="#request"]');
@@ -61,6 +69,13 @@ describe('components RequestDetails', () => {
 
     const responseTab = enzymeWrapper.find('[href="#response"]');
     expect(responseTab.props().className).to.eql('nav-link disabled');
+  });
+
+  it('should invoke activate tab action on response tab click', () => {
+    const { props, enzymeWrapper } = setup({ itemState: { activatTab: 'request' } });
+    const requestTab = enzymeWrapper.find('[href="#response"]');
+    requestTab.props().onClick({ preventDefault: sinon.spy() });
+    expect(props.actions.activateRequestDetailsTab).to.have.been.calledWith(props.request, 'response');
   });
 
   describe('req', () => {

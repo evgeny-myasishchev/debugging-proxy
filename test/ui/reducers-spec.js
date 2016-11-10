@@ -208,7 +208,23 @@ describe('reducers', () => {
       });
     });
 
-    describe.only('fetch req body', () => {
+    describe('ACTIVATE_REQUEST_DETAILS_TAB', () => {
+      it('should set activatTab for given request', () => {
+        const tab1 = `tab-${chance.word()}`;
+        const tab2 = `tab-${chance.word()}`;
+        let state = invoke(initialState, actions.activateRequestDetailsTab(req1, tab1));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { activeTab: tab1 },
+        });
+        state = invoke(state, actions.activateRequestDetailsTab(req2, tab2));
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: { activeTab: tab1 },
+          [_.get(req2, '_id')]: { activeTab: tab2 },
+        });
+      });
+    });
+
+    describe('fetch req body', () => {
       it('should set isFetchingBody to true when fetching', () => {
         const state = invoke(initialState, { type: actions.FETCH_REQUEST_BODY, request: req1 });
         expect(state.requestListItems).to.eql({

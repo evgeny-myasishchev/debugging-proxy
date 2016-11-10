@@ -41,6 +41,27 @@ export function fetchRequestHasNoBody(request) {
   return { type : FETCH_REQ_HAS_NO_BODY, request }
 }
 
+export const FETCH_RESPONSE_BODY = 'FETCH_RESPONSE_BODY';
+export const FETCH_RES_BODY_SUCCESS = 'FETCH_RES_BODY_SUCCESS';
+export const FETCH_RES_BODY_FAILURE = 'FETCH_RES_BODY_FAILURE';
+
+export function fetchResponseBody(request) {
+  const requestId = _.get(request, '_id');
+  return (despatch) => despatch({
+    request,
+    [CALL_API]: {
+      types: [ FETCH_RESPONSE_BODY, FETCH_RES_BODY_SUCCESS, FETCH_RES_BODY_FAILURE ],
+      endpoint: `/api/v1/requests/${requestId}/response`
+    }
+  })
+}
+
+export const ACTIVATE_REQUEST_DETAILS_TAB = 'ACTIVATE_REQUEST_DETAILS_TAB';
+
+export function activateRequestDetailsTab(request, tab) {
+  return { type : ACTIVATE_REQUEST_DETAILS_TAB, request, tab };
+}
+
 export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE'
 
 // Resets the currently visible error message.

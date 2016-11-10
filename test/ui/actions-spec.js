@@ -67,6 +67,33 @@ describe('ui', () => {
       });
     });
 
+    describe('fetchResponseBody', () => {
+      it('should despatch api action to fetch single response body', () => {
+        const req = chance.data.savedRequest();
+        const requestId = _.get(req, '_id');
+        const store = mockStore({ });
+        store.dispatch(actions.fetchResponseBody(req));
+        expect(store.getActions().length).to.eql(1);
+        const action = store.getActions()[0];
+        expect(action.type).to.eql(CALL_API);
+        expect(action.original.request).to.eql(req);
+        expect(action.callAPI.types).to.eql([actions.FETCH_RESPONSE_BODY, actions.FETCH_RES_BODY_SUCCESS, actions.FETCH_RES_BODY_FAILURE]);
+        expect(action.callAPI.endpoint).to.eql(`/api/v1/requests/${requestId}/response`);
+      });
+    });
+
+    describe('activateRequestDetailsTab', () => {
+      it('should build activate request details tab for given request and tab', () => {
+        const req = chance.data.savedRequest();
+        const tab = chance.word();
+        expect(actions.activateRequestDetailsTab(req, tab)).to.eql({
+          type: actions.ACTIVATE_REQUEST_DETAILS_TAB,
+          request: req,
+          tab,
+        });
+      });
+    });
+
     describe('resetErrorMessage', () => {
       it('should create reset error message action', () => {
         const action = actions.resetErrorMessage();

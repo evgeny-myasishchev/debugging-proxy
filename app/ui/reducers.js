@@ -32,6 +32,11 @@ function requestListItems(state = {}, action) {
     const expanded = !_.get(state, [requestId, 'expanded'], false);
     return _.merge({}, state, {[requestId]: { expanded : expanded }});
   }
+  if(action.type === actions.ACTIVATE_REQUEST_DETAILS_TAB) {
+    const requestId = _.get(action, 'request._id');
+    const tab = _.get(action, 'tab');
+    return _.merge({}, state, {[requestId]: { activeTab : tab }});
+  }
   if (action.type === actions.FETCH_REQUEST_BODY) {
     const requestId = _.get(action, 'request._id');
     return _.merge({}, state, {[requestId]: { req : { hasNoBody : false, isFetchingBody : true } }});

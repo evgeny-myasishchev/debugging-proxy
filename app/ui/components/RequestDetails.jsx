@@ -54,9 +54,25 @@ export default class RequestDetails extends Component {
     const classes = ['nav-link'];
     if(isActive) classes.push('active');
     if(isDisabled) classes.push('disabled');
+    const {
+      request,
+      actions : { activateRequestDetailsTab }
+    } = this.props;
+
+    function handleClick(e) {
+      activateRequestDetailsTab(request, href);
+      e.preventDefault();
+    }
+
     return (
       <li className="nav-item">
-        <a className={classes.join(' ')} data-toggle="tab" href={'#' + href} role="tab">{name}</a>
+        <a
+          className={classes.join(' ')}
+          onClick={handleClick}
+          data-toggle="tab"
+          href={'#' + href}
+          role="tab"
+        >{name}</a>
       </li>
     )
   }
