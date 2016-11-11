@@ -94,28 +94,6 @@ describe('components RequestDetails', () => {
       expect(enzymeWrapper.find('[id="request"]').length).to.eql(0);
     });
 
-    it('should fetch request body', () => {
-      const { props } = setup();
-      expect(props.actions.fetchRequestBody).to.have.callCount(1);
-      expect(props.actions.fetchRequestBody).to.have.been.calledWith(props.request);
-    });
-
-    it('should not fetch request body if no request body', () => {
-      const { props } = setup({ itemState: { req: { hasNoBody: true } } });
-      expect(props.actions.fetchRequestBody).to.have.callCount(0);
-    });
-
-    it('should not fetch request body if already fetched', () => {
-      const { props } = setup({ itemState: { req: { bodyFetched: true } } });
-      expect(props.actions.fetchRequestBody).to.have.callCount(0);
-    });
-
-    it('should not render request body if no request state', () => {
-      const { enzymeWrapper } = setup();
-      expect(enzymeWrapper.find('[id="request"] HttpBody').length).to.eql(0);
-      expect(enzymeWrapper.find('[id="request"] h4.card-title').length).to.eql(1);
-    });
-
     it('should not render request body if has no body', () => {
       const { enzymeWrapper } = setup({ itemState: { req: { hasNoBody: true } } });
       expect(enzymeWrapper.find('[id="request"] HttpBody').length).to.eql(0);
@@ -123,11 +101,20 @@ describe('components RequestDetails', () => {
     });
 
     it('should render request body if has body', () => {
-      const reqState = { hasNoBody: false, dummy: new Date() };
-      const { enzymeWrapper } = setup({ itemState: { req: reqState } });
+      const reqState = { dummy: new Date() };
+      const {
+        enzymeWrapper,
+        props: {
+          request, actions: { fetchRequestBody },
+        },
+      } = setup({ itemState: { req: reqState } });
       const httpBody = enzymeWrapper.find('[id="request"] HttpBody');
       expect(httpBody.length).to.eql(1);
-      expect(httpBody.props()).to.eql({ state: reqState });
+      expect(httpBody.props()).to.eql({
+        request,
+        state: reqState,
+        actions: { fetchBody: fetchRequestBody },
+      });
     });
   });
 
@@ -142,30 +129,21 @@ describe('components RequestDetails', () => {
       expect(enzymeWrapper.find('[id="response"]').length).to.eql(0);
     });
 
-    it('should fetch response body', () => {
-      const { props } = setup({ itemState: { activeTab: 'response' } });
-      expect(props.actions.fetchResponseBody).to.have.callCount(1);
-      expect(props.actions.fetchResponseBody).to.have.been.calledWith(props.request);
-    });
-
-    it('should not fetch response body if already fetched', () => {
-      const { props } = setup({ itemState: { res: { bodyFetched: true } } });
-      expect(props.actions.fetchResponseBody).to.have.callCount(0);
-    });
-
-    it('should not render response body if no response state', () => {
-      const { enzymeWrapper } = setup();
-      expect(enzymeWrapper.find('HttpBody').length).to.eql(0);
-      expect(enzymeWrapper.find('h4.card-title').length).to.eql(1);
-    });
-
     it('should render response body', () => {
-      const resState = { hasNoBody: false, dummy: new Date() };
-      const { enzymeWrapper } = setup({ itemState: { activeTab: 'response', res: resState } });
+      const resState = { dummy: new Date() };
+      const {
+        enzymeWrapper,
+        props: {
+          request, actions: { fetchResponseBody },
+        },
+      } = setup({ itemState: { activeTab: 'response', res: resState } });
       const httpBody = enzymeWrapper.find('[id="response"] HttpBody');
       expect(httpBody.length).to.eql(1);
-      expect(httpBody.props()).to.eql({ state: resState });
-      expect(enzymeWrapper.find('h4.card-title').length).to.eql(2);
+      expect(httpBody.props()).to.eql({
+        request,
+        state: resState,
+        actions: { fetchBody: fetchResponseBody },
+      });
     });
   });
 });

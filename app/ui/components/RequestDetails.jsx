@@ -4,25 +4,7 @@ import HttpBody from './HttpBody.jsx'
 import HttpHeaders from './HttpHeaders.jsx'
 
 export default class RequestDetails extends Component {
-  componentWillMount() {
-    const {
-      itemState,
-      request,
-      actions : { fetchRequestBody, fetchResponseBody }
-    } = this.props;
-
-    const activeTab = _.get(itemState, 'activeTab', 'request');
-
-    if(activeTab === 'request') {
-      if(!_.get(itemState, 'req.hasNoBody', false) && !_.get(itemState, 'req.bodyFetched', false)) {
-        fetchRequestBody(request);
-      }
-    } else {
-      if(!_.get(itemState, 'res.bodyFetched', false)) {
-        fetchResponseBody(request);
-      }
-    }
-  }
+  componentWillMount() {}
 
   hasResponse() {
     return _.has(this.props, 'request.response');
@@ -33,18 +15,18 @@ export default class RequestDetails extends Component {
     return _.get(this.props, 'itemState.activeTab', 'request');
   }
 
-  renderHttpBody(stateName) {
+  renderHttpBody(stateName, fetchAction) {
     const {
+      request,
       itemState
     } = this.props;
-    if(!_.has(itemState, stateName)) return false;
-    if(_.get(itemState, `${stateName}.hasNoBody`, true)) return false;
-    const state = itemState[stateName];
+    if(_.get(itemState, `${stateName}.hasNoBody`, false)) return false;
+    const state = _.get(itemState, stateName, {});
     return (
       <div>
         <h4 className='card-title'>Body</h4>
         <div className='card card-outline-secondary'>
-          <HttpBody state={state} />
+          <HttpBody state={state} request={request} actions={{fetchBody: fetchAction}} />
         </div>
       </div>
     )
@@ -83,6 +65,9 @@ export default class RequestDetails extends Component {
       request: {
         request,
         response
+      },
+      actions : {
+        fetchRequestBody, fetchResponseBody
       }
     } = this.props;
     const activeTab = this.activeTab();
@@ -100,13 +85,13 @@ export default class RequestDetails extends Component {
             <div id="request" role="tabpanel">
               <h4 className='card-title'>Headers</h4>
               <HttpHeaders headers={request.headers} />
-              { this.renderHttpBody('req') }
+              { this.renderHttpBody('req', fetchRequestBody) }
             </div>
           ) : (
             <div id="response" role="tabpanel">
               <h4 className='card-title'>Headers</h4>
               <HttpHeaders headers={response.headers} />
-              { this.renderHttpBody('res') }
+              { this.renderHttpBody('res', fetchResponseBody) }
             </div>
           )}
         </div>
