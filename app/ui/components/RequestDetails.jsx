@@ -26,7 +26,7 @@ export default class RequestDetails extends Component {
       <div>
         <h4 className='card-title'>Body</h4>
         <div className='card card-outline-secondary'>
-          <HttpBody state={state} request={request} actions={{fetchBody: fetchAction}} />
+          <HttpBody key={stateName} state={state} request={request} actions={{fetchBody: fetchAction}} />
         </div>
       </div>
     )
