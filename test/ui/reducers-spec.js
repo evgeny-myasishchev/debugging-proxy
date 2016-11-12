@@ -270,5 +270,43 @@ describe('reducers', () => {
         });
       });
     });
+
+    describe('fetch res body', () => {
+      it('should set isFetchingBody to true when fetching', () => {
+        const state = invoke(initialState, { type: actions.FETCH_RESPONSE_BODY, request: req1 });
+        expect(state.requestListItems).to.eql({
+          [_.get(req1, '_id')]: {
+            res: { isFetchingBody: true },
+          },
+        });
+      });
+
+      it('should set isFetchingBody to false and body on fetch success', () => {
+        const body = chance.sentence();
+        const reqId = _.get(req1, '_id');
+        _.set(initialState, `requestListItems[${reqId}]`, { res: { isFetchingBody: true } });
+        const state = invoke(initialState, { type: actions.FETCH_RES_BODY_SUCCESS, request: req1, response: body });
+        expect(state.requestListItems).to.eql({
+          [reqId]: {
+            res: { isFetchingBody: false, bodyFetched: true, body },
+          },
+        });
+      });
+
+      it('should set isFetchingBody to false and reason on fetch failure', () => {
+        const reason = {
+          statusCode: `status-${chance.word()}`,
+          statusMessage: `status-msg-${chance.word()}`,
+        };
+        const reqId = _.get(req1, '_id');
+        _.set(initialState, `requestListItems[${reqId}]`, { res: { isFetchingBody: true } });
+        const state = invoke(initialState, { type: actions.FETCH_RES_BODY_FAILURE, request: req1, error: reason });
+        expect(state.requestListItems).to.eql({
+          [reqId]: {
+            res: { isFetchingBody: false, bodyFetched: false, reason },
+          },
+        });
+      });
+    });
   });
 });

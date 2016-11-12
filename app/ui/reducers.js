@@ -37,6 +37,8 @@ function requestListItems(state = {}, action) {
     const tab = _.get(action, 'tab');
     return _.merge({}, state, {[requestId]: { activeTab : tab }});
   }
+
+  //Fetch reqeust body
   if (action.type === actions.FETCH_REQUEST_BODY) {
     const requestId = _.get(action, 'request._id');
     return _.merge({}, state, {[requestId]: { req : { hasNoBody : false, isFetchingBody : true } }});
@@ -53,6 +55,21 @@ function requestListItems(state = {}, action) {
     const requestId = _.get(action, 'request._id');
     return _.merge({}, state, {[requestId]: { req : { hasNoBody : true, isFetchingBody : false } }});
   }
+
+  //Fetch response body
+  if (action.type === actions.FETCH_RESPONSE_BODY) {
+    const requestId = _.get(action, 'request._id');
+    return _.merge({}, state, {[requestId]: { res : { isFetchingBody : true } }});
+  }
+  if (action.type === actions.FETCH_RES_BODY_SUCCESS) {
+    const requestId = _.get(action, 'request._id');
+    return _.merge({}, state, {[requestId]: { res : { isFetchingBody : false, bodyFetched : true, body : action.response } }});
+  }
+  if (action.type === actions.FETCH_RES_BODY_FAILURE) {
+    const requestId = _.get(action, 'request._id');
+    return _.merge({}, state, {[requestId]: { res : { isFetchingBody : false, bodyFetched : false, reason : action.error } }});
+  }
+
   return state;
 }
 
