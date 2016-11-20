@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import 'isomorphic-fetch'
 
 // Action key that carries API call info interpreted by this Redux middleware.
@@ -33,7 +34,7 @@ export default (apiRoot) => () => next => action => {
   next(actionWith({ type: requestType }));
 
   const fullUrl = (endpoint.indexOf(apiRoot) === -1) ? apiRoot + endpoint : endpoint;
-  return fetch(fullUrl)
+  return fetch(fullUrl, { method : _.get(callAPI, 'method', 'GET'), body : _.get(callAPI, 'body', null) })
     .then(response => {
       if (!response.ok) {
         return Promise.reject(response);

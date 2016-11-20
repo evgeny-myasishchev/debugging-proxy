@@ -145,4 +145,36 @@ describe('ui middleware api', () => {
       .then(done)
       .catch(done);
   });
+
+  it('should use specified method and body', (done) => {
+    const postBody = {
+      [`prop1-${chance.word()}`]: chance.word(),
+      [`prop2-${chance.word()}`]: chance.word(),
+    };
+    const action = buildAction(_.merge(actionData(), {
+      method: 'POST',
+      body: postBody,
+    }));
+    const data = chance.sentence();
+    fetchMock.mock((url, opts) => {
+      expect(url).to.eql(`${apiRoot}${action[CALL_API].endpoint}`);
+      expect(opts).to.eql({
+        method: 'POST',
+        body: postBody,
+      });
+      return true;
+    }, {
+      status: 200,
+      body: data,
+    });
+    fn(next)(action)
+      .then(() => {
+        expect(next).to.have.been.calledWith(_.merge({
+          type: action[CALL_API].types[1],
+          response: data,
+        }, action));
+      })
+      .then(done)
+      .catch(done);
+  });
 });
