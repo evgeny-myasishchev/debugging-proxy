@@ -74,6 +74,36 @@ describe('reducers', () => {
       });
     });
 
+    describe('PURGE_REQUESTS', () => {
+      it('should handle purge requests action', () => {
+        const action = { type: actions.PURGE_REQUESTS };
+        initialState.requests.entries = [reqEntry(), reqEntry()];
+        const state = invoke(initialState, action);
+        expect(state.requests.isPurging).to.eql(true);
+        expect(state).not.to.eql(initialState);
+        initialState.requests.isPurging = true;
+        expect(state).to.eql(initialState);
+      });
+
+      it('should clear requests on success', () => {
+        const action = { type: actions.PURGE_REQUESTS_SUCCESS };
+        initialState.requests.isPurging = true;
+        initialState.requests.entries = [reqEntry(), reqEntry()];
+        const state = invoke(initialState, action);
+        expect(state.requests.isPurging).to.eql(false);
+        expect(state.requests.entries).to.eql([]);
+      });
+
+      it('should set is fetching to false on failure', () => {
+        const action = { type: actions.PURGE_REQUESTS_FAILURE };
+        initialState.requests.isPurging = true;
+        initialState.requests.entries = [reqEntry(), reqEntry()];
+        const state = invoke(initialState, action);
+        expect(state.requests.isPurging).to.eql(false);
+        expect(state.requests.entries.length).to.eql(2);
+      });
+    });
+
     describe('ADD_NEW_REQUEST', () => {
       it('should insert new request on top of requests', () => {
         const newRequest = reqEntry();
@@ -306,6 +336,19 @@ describe('reducers', () => {
             res: { isFetchingBody: false, bodyFetched: false, reason },
           },
         });
+      });
+    });
+
+    describe('PURGE_REQUESTS_SUCCESS', () => {
+      it('should clear state', () => {
+        const action = { type: actions.PURGE_REQUESTS_SUCCESS };
+        initialState.requestListItems = {
+          [`${chance.word()}`]: chance.word(),
+          [`${chance.word()}`]: chance.word(),
+          [`${chance.word()}`]: chance.word(),
+        };
+        const state = invoke(initialState, action);
+        expect(state.requestListItems).to.eql({});
       });
     });
   });

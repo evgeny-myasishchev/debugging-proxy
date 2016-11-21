@@ -23,6 +23,18 @@ function requests(state = { entries: [], isFetching: false }, action) {
     request.completedAt = action.response.completedAt;
     return _.assign({}, state, { entries : entries });
   }
+
+  //Purge
+  if(action.type === 'PURGE_REQUESTS') {
+    return _.assign({}, state, { isPurging : true});
+  }
+  if(action.type === 'PURGE_REQUESTS_SUCCESS') {
+    return _.assign({}, state, { entries : [], isPurging : false});
+  }
+  if(action.type === 'PURGE_REQUESTS_FAILURE') {
+    return _.assign({}, state, { isPurging : false});
+  }
+
   return state;
 }
 
@@ -68,6 +80,11 @@ function requestListItems(state = {}, action) {
   if (action.type === actions.FETCH_RES_BODY_FAILURE) {
     const requestId = _.get(action, 'request._id');
     return _.merge({}, state, {[requestId]: { res : { isFetchingBody : false, bodyFetched : false, reason : action.error } }});
+  }
+
+  //Purge
+  if(action.type === 'PURGE_REQUESTS_SUCCESS') {
+    return {};
   }
 
   return state;
