@@ -82,6 +82,19 @@ describe('ui', () => {
       });
     });
 
+    describe('purgeRequests', () => {
+      it('should despatch api action to purge requests', () => {
+        const store = mockStore({ });
+        store.dispatch(actions.purgeRequests());
+        expect(store.getActions().length).to.eql(1);
+        const action = store.getActions()[0];
+        expect(action.type).to.eql(CALL_API);
+        expect(action.callAPI.types).to.eql([actions.PURGE_REQUESTS, actions.PURGE_REQUESTS_SUCCESS, actions.PURGE_REQUESTS_FAILURE]);
+        expect(action.callAPI.endpoint).to.eql('/api/v1/requests');
+        expect(action.callAPI.method).to.eql('DELETE');
+      });
+    });
+
     describe('activateRequestDetailsTab', () => {
       it('should build activate request details tab for given request and tab', () => {
         const req = chance.data.savedRequest();

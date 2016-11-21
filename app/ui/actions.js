@@ -56,6 +56,20 @@ export function fetchResponseBody(request) {
   })
 }
 
+export const PURGE_REQUESTS = 'PURGE_REQUESTS';
+export const PURGE_REQUESTS_SUCCESS = 'PURGE_REQUESTS_SUCCESS';
+export const PURGE_REQUESTS_FAILURE = 'PURGE_REQUESTS_FAILURE';
+
+export function purgeRequests() {
+  return (despatch) => despatch({
+    [CALL_API]: {
+      types: [ PURGE_REQUESTS, PURGE_REQUESTS_SUCCESS, PURGE_REQUESTS_FAILURE ],
+      endpoint: `/api/v1/requests`,
+      method : 'DELETE'
+    }
+  })
+}
+
 export const ACTIVATE_REQUEST_DETAILS_TAB = 'ACTIVATE_REQUEST_DETAILS_TAB';
 
 export function activateRequestDetailsTab(request, tab) {
