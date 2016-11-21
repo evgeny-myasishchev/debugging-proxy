@@ -9,30 +9,41 @@ import RequestsList from '../components/RequestsList.jsx'
 
 export class App extends Component {
   componentWillMount() {
-    const { 
+    const {
       requests : { entries : entries },
-      actions : { fetchRequests: fetchRequests} 
+      actions : { fetchRequests: fetchRequests}
     } = this.props;
-    
+
     //Fetching only if there are no entries
     //Helps to prevent fething if we have persisted state (with persistState)
     if(!entries.length) fetchRequests();
   }
-  
+
   renderLoading() {
     return (
       <div className='tag tag-info'>Loading requests...</div>
     )
   }
-  
+
   renderEntries() {
-    const { 
-      actions, 
-      requests : {entries: entries}, 
+    const {
+      actions,
+      requests : {entries: entries},
       requestListItems
     } = this.props;
     return (
       <RequestsList requests={entries} actions={actions} requestListItems={requestListItems} />
+    )
+  }
+
+  renderPurgeBtn() {
+    const {
+      requests : { isPurging },
+      actions : { purgeRequests }
+    } = this.props;
+    const text = isPurging ? 'Purging requests...' : 'Purge requests'
+    return (
+      <button id='btnPurgeRequests' disabled={isPurging} className='btn btn-primary btn-sm' onClick={() => purgeRequests()}>{text}</button>
     )
   }
 
@@ -41,8 +52,9 @@ export class App extends Component {
     const renderer = isFetching ? this.renderLoading : this.renderEntries;
     return (
       <div>
-        <h1>Requests</h1>
-
+        <h1>
+          Requests {this.renderPurgeBtn()}
+        </h1>
         {renderer.apply(this)}
       </div>
     );

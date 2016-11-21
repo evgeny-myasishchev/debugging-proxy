@@ -14,6 +14,7 @@ describe('containers App', () => {
         isFetching: false,
       }, p),
       actions: {
+        purgeRequests: sinon.spy(),
         fetchRequests: sinon.spy(),
       },
       requestListItems: { dummy: chance.word() },
@@ -52,5 +53,22 @@ describe('containers App', () => {
     const loading = enzymeWrapper.find('div.tag.tag-info');
     expect(loading.length).to.eql(1);
     expect(loading.props().children).to.eql('Loading requests...');
+  });
+
+  describe('purgeRequests', () => {
+    it('should purge requests on purge button click', () => {
+      const { props, enzymeWrapper } = setup();
+      const btn = enzymeWrapper.find('[id="btnPurgeRequests"]');
+      btn.props().onClick();
+      expect(btn.props().disabled).to.be.an('undefined');
+      expect(props.actions.fetchRequests).to.have.callCount(1);
+    });
+
+    it('should render progress if purging', () => {
+      const { enzymeWrapper } = setup({ isPurging: true });
+      const btn = enzymeWrapper.find('[id="btnPurgeRequests"]');
+      expect(btn.text()).to.eql('Purging requests...');
+      expect(btn.props().disabled).to.eql(true);
+    });
   });
 });
